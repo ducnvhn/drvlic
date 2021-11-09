@@ -2,9 +2,9 @@ import { ApolloClient, InMemoryCache, ApolloLink, from } from '@apollo/client'
 // import { createUploadLink } from 'apollo-upload-client'
 const { createUploadLink } = require('apollo-upload-client')
 
-// const uri = "http://localhost:5001"
 const uri = process.env.NODE_ENV === 'development' ? process.env.REACT_APP_DEV_API : process.env.REACT_APP_PROD_API
 const httpLink = new createUploadLink({ uri })
+// const httpLink = new createUploadLink()
 
 const authMiddleware = new ApolloLink((operation, forward) => {
   operation.setContext(({headers = {} }) => ({

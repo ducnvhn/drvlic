@@ -1,0 +1,12 @@
+.homeContainer {
+    min-height: 100vh;
+}
+.homeHeader {
+    display: flex;
+    padding: 1em 2em;
+}
+.homeContent {
+    padding: 1em;
+    margin: 1em;
+    background-color: #fff;
+}
