@@ -13,28 +13,16 @@ import {
     useMutation,
     useLazyQuery,
 } from '@apollo/client'
-// import XLSX from 'xlsx'
 import {
-    // ArrowLeftOutlined,
     CaretLeftFilled,
-    // ArrowRightOutlined,
-    // CalendarFilled,
-    // CalendarOutlined,
-    // CalendarTwoTone,
     CheckCircleOutlined,
     CheckOutlined,
-    // CheckSquareFilled,
     CheckSquareOutlined,
     DeleteOutlined,
     DollarOutlined,
-    DownloadOutlined,
     EllipsisOutlined,
-    // ExceptionOutlined,
-    // ExclamationCircleOutlined,
     ExclamationOutlined,
     FilterOutlined,
-    // InfoCircleOutlined,
-    // LeftOutlined,
     OrderedListOutlined,
     PlusOutlined,
     PoundOutlined,
@@ -56,14 +44,11 @@ import {
     CONFIRM_PAYMENT,
     REQUEST_WITHDRAW,
     CONFIRM_WITHDRAW,
-    // CONFIRM_RESERVE_BC1,
     LOAD_A_REPORT,
     MOVE_TO_R1,
     REQUEST_CONFIRM_P_2,
     CONFIRM_PAYMENT_TWO,
     MARK_COMPLETED,
-    // REQUEST_RESERVE_RESULT,
-    // CONFIRM_RESERVE_RESULT,
     REQUEST_RETURN_RESULT,
     REJECT_WD_FN,
     CONFIRM_WD_GD,
@@ -209,7 +194,6 @@ const TLandingPage = () => {
     const [admMarkFinalFail] = useMutation(ADMIN_MARK_FINAL_FAIL, { refetchQueries: [LOAD_STUDENTS] })
     const [tRequestCRF] = useMutation(TEACHER_REQUEST_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_STUDENTS] })
     const [admCFRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_STUDENTS] })
-    // const [exportList, { loading: exporting }] = useLazyQuery(LOAD_STUDENTS, { fetchPolicy: 'network-only', onCompleted: (data) => console.log(data) })
 
     const [filter, setFilter] = React.useState<Record<string,any>>({
         ten: null,
@@ -386,17 +370,17 @@ const TLandingPage = () => {
                         <Menu.Item icon={<DollarOutlined />} key="t2" onClick={() => doAction(requestConfirmP)}>
                             Yêu cầu XNTT đợt 1
                         </Menu.Item>
-                        <Menu.Item icon={<PoundOutlined />} key="t5" onClick={() => doAction(requestConfirmP2)}>
+                        <Menu.Item icon={<PoundOutlined />} key="t3" onClick={() => doAction(requestConfirmP2)}>
                             Yêu cầu XNTT đợt 2
                         </Menu.Item>
-                        <Menu.Item icon={<TransactionOutlined />} key="t6" onClick={() => doAction(tRequestCRF)}>
+                        <Menu.Item icon={<TransactionOutlined />} key="t4" onClick={() => doAction(tRequestCRF)}>
                             Yêu cầu XNTT thi lại
                         </Menu.Item>
                     </Menu.SubMenu>
-                    <Menu.Item icon={<RollbackOutlined />} key="t4" onClick={() => doAction(requestWD)}>
+                    <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
                         Yêu cầu rút hồ sơ
                     </Menu.Item>
-                    <Menu.Item icon={<ReloadOutlined />} key="t5" onClick={() => doAction(requestReturnResult)}>
+                    <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
                         Yêu cầu quay lại thi
                     </Menu.Item>
                 </Menu>
@@ -405,44 +389,44 @@ const TLandingPage = () => {
         if (user.role === 'ADMIN') {
             return (
                 <Menu theme="dark">
-                    <Menu.SubMenu key="_bc" icon={<CaretLeftFilled />} title="Báo cáo ">
+                    <Menu.SubMenu key="A1" icon={<CaretLeftFilled />} title="Báo cáo ">
                         <Menu.Item icon={<OrderedListOutlined />} key="_a2" onClick={() => toggleReportModal(true)}>
                             Chuyển báo cáo 1
                         </Menu.Item>
-                        <Menu.Item icon={<UnorderedListOutlined />} key="_a7" onClick={() => toggleBC2Modal(true)}>
+                        <Menu.Item icon={<UnorderedListOutlined />} key="_a3" onClick={() => toggleBC2Modal(true)}>
                             Chuyển báo cáo 2
                         </Menu.Item>
                     </Menu.SubMenu>
                     <Menu.SubMenu key="_course" icon={<CaretLeftFilled />} title="Khóa học">
-                        <Menu.Item icon={<CheckOutlined />} key="_a3" onClick={() => doAction(markComplete)}>
+                        <Menu.Item icon={<CheckOutlined />} key="_a4" onClick={() => doAction(markComplete)}>
                             Đánh dấu hoàn thành khóa học
                         </Menu.Item>
-                        <Menu.Item icon={<DeleteOutlined />} key="_a3" onClick={() => doActionWithConfirm(admMarkRemove, 'Hủy Hồ sơ | bỏ học', 'Bạn có chắc muốn hủy các hồ sơ đã chọn?')}>
+                        <Menu.Item icon={<DeleteOutlined />} key="_a5" onClick={() => doActionWithConfirm(admMarkRemove, 'Hủy Hồ sơ | bỏ học', 'Bạn có chắc muốn hủy các hồ sơ đã chọn?')}>
                             Hủy hồ sơ / bỏ học
                         </Menu.Item>
-                        <Menu.Item icon={<CheckSquareOutlined />} key="_a4" onClick={() => doAction(markGrad)}>
+                        <Menu.Item icon={<CheckSquareOutlined />} key="_a6" onClick={() => doAction(markGrad)}>
                             Đánh dấu Đã tốt nghiệp
                         </Menu.Item>
-                        <Menu.Item icon={<ExclamationOutlined />} key="_a5" onClick={() => doAction(markFail)}>
+                        <Menu.Item icon={<ExclamationOutlined />} key="_a7" onClick={() => doAction(markFail)}>
                             Đánh dấu trượt TN
                         </Menu.Item>
-                        <Menu.Item icon={<RetweetOutlined />} key="_a6" onClick={() => doAction(markforretest)}>
+                        <Menu.Item icon={<RetweetOutlined />} key="_a8" onClick={() => doAction(markforretest)}>
                             Vào danh sách thi lại TN
                         </Menu.Item>
 
-                        <Menu.Item icon={<UnorderedListOutlined />} key="_a7" onClick={() => doActionWithConfirm(reserveResult, 'Bảo lưu kết quả', 'Bạn có chắc muốn bảo lưu kết quả cho các hồ sơ đã chọn?')}>
+                        <Menu.Item icon={<UnorderedListOutlined />} key="_a9" onClick={() => doActionWithConfirm(reserveResult, 'Bảo lưu kết quả', 'Bạn có chắc muốn bảo lưu kết quả cho các hồ sơ đã chọn?')}>
                             Bảo lưu kết quả
                         </Menu.Item>
-                        <Menu.Item icon={<ReloadOutlined />} key="_a7" onClick={() => doActionWithConfirm(admConfirmReturn, 'Xác nhận quay lại', 'Xác nhận cho các hồ sơ đang bảo lưu quay lại thi')}>
+                        <Menu.Item icon={<ReloadOutlined />} key="_a10" onClick={() => doActionWithConfirm(admConfirmReturn, 'Xác nhận quay lại', 'Xác nhận cho các hồ sơ đang bảo lưu quay lại thi')}>
                             Xác nhận quay lại thi
                         </Menu.Item>
                     </Menu.SubMenu>
                     <Menu.SubMenu key="_failed" icon={<CaretLeftFilled />} title="Thi trượt">
-                        <Menu.Item key="1" onClick={() => confirmFinalFail('THI_TRUOT_LT')}>Thi trượt lý thuyết</Menu.Item>
-                        <Menu.Item key="2" onClick={() => confirmFinalFail('THI_TRUOT_SH')}>Thi trượt Sa hình</Menu.Item>
-                        <Menu.Item key="3" onClick={() => confirmFinalFail('THI_TRUOT_DT')}>Thi trượt đường trường</Menu.Item>
+                        <Menu.Item key="a11" onClick={() => confirmFinalFail('THI_TRUOT_LT')}>Thi trượt lý thuyết</Menu.Item>
+                        <Menu.Item key="a12" onClick={() => confirmFinalFail('THI_TRUOT_SH')}>Thi trượt Sa hình</Menu.Item>
+                        <Menu.Item key="a13" onClick={() => confirmFinalFail('THI_TRUOT_DT')}>Thi trượt đường trường</Menu.Item>
                     </Menu.SubMenu>
-                    <Menu.Item icon={<CheckCircleOutlined color="green" />} key="_a7" onClick={() => doActionWithConfirm(admMarkFinish, 'Xác nhận Hoàn thành', 'Xác nhận cho các hồ sơ đã chọn hoàn thành khóa học')}>
+                    <Menu.Item icon={<CheckCircleOutlined color="green" />} key="_a14" onClick={() => doActionWithConfirm(admMarkFinish, 'Xác nhận Hoàn thành', 'Xác nhận cho các hồ sơ đã chọn hoàn thành khóa học')}>
                         Xác nhận Hoàn thành
                     </Menu.Item>
                 </Menu>
@@ -451,21 +435,21 @@ const TLandingPage = () => {
         if (user.role === 'FINANCE') {
             return (
                 <Menu theme="dark">
-                    <Menu.SubMenu key="_failed" icon={<CaretLeftFilled />} title="Xác nhận thanh toán">
-                        <Menu.Item icon={<DollarOutlined />} key="_f1" onClick={() => doAction(confirmP)}>
+                    <Menu.SubMenu key="f1" icon={<CaretLeftFilled />} title="Xác nhận thanh toán">
+                        <Menu.Item icon={<DollarOutlined />} key="_f2" onClick={() => doAction(confirmP)}>
                             Xác nhận thanh toán đợt 1
                         </Menu.Item>
-                        <Menu.Item icon={<PoundOutlined />} key="_f2" onClick={() => doAction(confirmP2)}>
+                        <Menu.Item icon={<PoundOutlined />} key="_f3" onClick={() => doAction(confirmP2)}>
                             Xác nhận thanh toán đợt 2
                         </Menu.Item>
-                        <Menu.Item icon={<CheckCircleOutlined />} key="_f3" onClick={() => doActionWithConfirm(admCFRF, 'Xác nhận Thanh toán', 'Xác nhận thanh toán thi lại cho hồ sơ thi trượt?')}>
+                        <Menu.Item icon={<CheckCircleOutlined />} key="_f4" onClick={() => doActionWithConfirm(admCFRF, 'Xác nhận Thanh toán', 'Xác nhận thanh toán thi lại cho hồ sơ thi trượt?')}>
                             Xác nhận thanh toán thi lại
                         </Menu.Item>
                     </Menu.SubMenu>
-                    <Menu.Item icon={<CheckCircleOutlined />} key="_f4" onClick={() => doAction(cfWithdraw)}>
+                    <Menu.Item icon={<CheckCircleOutlined />} key="_f5" onClick={() => doAction(cfWithdraw)}>
                         Chấp thuận rút HS
                     </Menu.Item>
-                    <Menu.Item icon={<DeleteOutlined />} key="_f5" onClick={() => doAction(rejectWDFN)}>
+                    <Menu.Item icon={<DeleteOutlined />} key="_f6" onClick={() => doAction(rejectWDFN)}>
                         Không chấp thuận rút HS
                     </Menu.Item>
                 </Menu>
@@ -534,7 +518,7 @@ const TLandingPage = () => {
                 <ReloadOutlined />
             </Button>
         </Tooltip>,
-        <Dropdown trigger={['click']} key="_options" overlay={menu}>
+        <Dropdown trigger={['hover']} key="_options" overlay={menu}>
             <Tooltip title="Chức năng">
                 <Button type="primary" icon={<EllipsisOutlined />} loading={working} />
             </Tooltip>
