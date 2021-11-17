@@ -1,6 +1,7 @@
 import React from 'react'
 import {
     Button,
+    Descriptions,
     message,
     PageHeader
 } from 'antd'
@@ -13,12 +14,13 @@ import {
     useMutation
 } from '@apollo/client'
 import LoadinCenter from '../../common/LoadingCenter'
-import BasicInfor from './BasicInfor'
 import StudentsList from './StudentsList'
 import {
     useAuth
 } from '../../../context/AuthenticationContext'
 import { CheckOutlined } from '@ant-design/icons'
+import { trangthaibaocao } from '../../common/trangthai'
+import moment from 'moment'
 
 type ReportOneType = {
     loadReport: any,
@@ -137,10 +139,10 @@ const SingleAttReport:React.FC<ReportOneType> = ({
         return <LoadinCenter />
     }
     const extra = []
-    if (user.role === 'MANAGER') {
+    if (user.role === 'MANAGER' && type !=='BC2') {
         extra.push(
             (
-                <Button onClick={() => approve()} loading={approving} type="primary" shape="round">
+                <Button disabled={!data || data[dataKey as keyof Object].report.status === 'APPROVED'} onClick={() => approve()} loading={approving} type="primary" shape="round">
                     <CheckOutlined />
                     Phê duyệt
                 </Button>
@@ -148,10 +150,22 @@ const SingleAttReport:React.FC<ReportOneType> = ({
         )
     }
     if (data && data[dataKey as keyof Object]) {
+        const { report } = data[dataKey as keyof Object]
         return (
             <div>
-                <PageHeader title={`Báo cáo`} extra={extra} />
-                <BasicInfor report={data[dataKey as keyof Object].report} />
+                <PageHeader
+                    title={`Báo cáo: ${report.name}`}
+                    extra={extra}
+                    subTitle={`${report.desc}`}
+                >
+                    <Descriptions size="small" column={3}>
+                        <Descriptions.Item label="Hạng Bằng">{report.hangbang}</Descriptions.Item>
+                        <Descriptions.Item label="Ngày tạo">{moment(parseFloat(report.created)).format('DD/MM/YYYY')}</Descriptions.Item>
+                        <Descriptions.Item label="Trạng thái">{trangthaibaocao[report.status as keyof Object]}</Descriptions.Item>
+                        <Descriptions.Item label="Người tạo">{report.createdBy.name}</Descriptions.Item>
+                    </Descriptions>
+                </PageHeader>
+                {/* <BasicInfor report={data[dataKey as keyof Object].report} /> */}
                 <StudentsList
                     type={type}
                     report={data[dataKey as keyof Object].report}

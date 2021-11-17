@@ -10,6 +10,9 @@ import {
 } from 'antd'
 import moment from 'moment'
 import { CheckOutlined, EllipsisOutlined, FilterOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
+import {
+    useAuth
+} from '../../../context/AuthenticationContext'
 
 import AddStdModal from './AddStdModal'
 import FilterModal from './FilterModal'
@@ -41,6 +44,8 @@ const StudentsList:React.FC<CType> = ({
     const [filterModal, toggleFilterModal] = React.useState(false)
     const [removeModal, toggleRemoveModal] = React.useState(false)
     const [addModal, toggleAddModal] = React.useState(false)
+    const { getUser } = useAuth()
+    const user = getUser()
     const columns = [
         {
             title: 'STT',
@@ -114,28 +119,40 @@ const StudentsList:React.FC<CType> = ({
         await markComp(selected)
     }
 
-    const FunctionsDrop = () => (
-        <Dropdown key="_men" trigger={['click']} overlay={(
-            <Menu theme="dark">
-                <Menu.Item onClick={() => toggleAddModal(true)} key="_ađd" icon={<PlusOutlined />}>Thêm hồ sơ</Menu.Item>
-                <Menu.Item disabled={selected.length === 0} onClick={() => remove()} key="_rm" icon={<MinusOutlined />}>Loại hồ sơ</Menu.Item>
-                <Menu.Item icon={<CheckOutlined />} onClick={() => onCompleted()}>Đánh dấu hoàn thành học</Menu.Item>
-            </Menu>
-        )}>
-            <Button shape="round" type="primary" icon={<EllipsisOutlined />} />
-        </Dropdown>
-    )
+    const FunctionsDrop = () => {
+        if (type !=="BC2") {
+            return (
+                <Dropdown key="_men" trigger={['click']} overlay={(
+                    <Menu theme="dark">
+                    {report.status === 'PENDING' && <Menu.Item onClick={() => toggleAddModal(true)} key="_ađd" icon={<PlusOutlined />}>Thêm hồ sơ</Menu.Item>}
+                    {report.status === 'PENDING' && <Menu.Item disabled={selected.length === 0} onClick={() => remove()} key="_rm" icon={<MinusOutlined />}>Loại hồ sơ</Menu.Item>}
+                    <Menu.Item icon={<CheckOutlined />} onClick={() => onCompleted()}>Đánh dấu hoàn thành học</Menu.Item>
+                </Menu>
+            )}>
+                <Button shape="round" type="primary" icon={<EllipsisOutlined />} />
+            </Dropdown>
+        )
+        }
+        return null
+    }
     return (
         <div>
-            <PageHeader
-                title="Danh sách hồ sơ"
-                extra={[
-                    <Button danger={notFilterEmpty()} shape="round" key="_filter" icon={<FilterOutlined />} onClick={() => onFilterClick()}>
-                        {notFilterEmpty() ? 'Bỏ lọc' : 'Lọc'}
-                    </Button>,
-                    FunctionsDrop(),
-                ]}
-            />
+            {(user.role === 'MANAGER' || user.role === 'ADMIN') && (
+                <PageHeader
+                    title="Danh sách hồ sơ"
+                    extra={[
+                        <Button danger={notFilterEmpty()} shape="round" key="_filter" icon={<FilterOutlined />} onClick={() => onFilterClick()}>
+                            {notFilterEmpty() ? 'Bỏ lọc' : 'Lọc'}
+                        </Button>,
+                        FunctionsDrop(),
+                    ]}
+                />
+                )}
+            {(user.role === 'TEACHER' || user.role === 'FINANCE') && (
+                <PageHeader
+                    title="Danh sách hồ sơ"
+                />
+            )}
             <Table
                 rowKey="_id"
                 rowSelection={rowSelection}

@@ -21,7 +21,16 @@ export const LOAD_SINGLE_STD = gql`
             hopdongdaotao
             trangthai
             mobile
+            history {
+                state
+                date
+                reason
+            }
             baocao1 {
+                name
+                _id
+            }
+            baocao2 {
                 name
                 _id
             }
@@ -691,5 +700,157 @@ export const LOAD_SINGLE_B_REPORT = gql `
 export const MOVE_TO_R2 = gql`
     mutation moveToR2($students: [String], $report: String!) {
         moveToR2(students: $students, report: $report)
+    }
+`
+export const APPROVE_B_REPORT = gql `
+    mutation approveBReport($report: String!) {
+        approveBReport(report: $report) {
+                _id
+                hangbang
+                name
+                desc
+                status
+                createdBy {
+                    name
+                }
+                created
+                stdCount
+                approveDate
+            }
+        }
+`
+export const REJECT_WD_FN = gql `
+    mutation rejectWithdrawFN($students: [String]!) {
+        rejectWithdrawFN(students: $students)
+    }
+`
+export const CONFIRM_WD_GD = gql `
+    mutation confirmWithdrawGD($students: [String]!) {
+        confirmWithdrawGD(students: $students)
+    }
+`
+export const REJECT_WD_GD = gql `
+    mutation rejectWithdrawGD($students: [String]!) {
+        rejectWithdrawGD(students: $students)
+    }
+`
+export const MARK_GRAD = gql `
+    mutation markGrad($students: [String]!) {
+        markGrad(students: $students)
+    }
+`
+export const MARK_FAIL = gql `
+    mutation markFail($students: [String]!) {
+        markFail(students: $students)
+    }
+`
+export const MARK_FOR_RETEST = gql `
+    mutation markForReTest($students: [String]!) {
+        markForReTest(students: $students)
+    }
+`
+export const RESERVE_RESULT = gql `
+    mutation adminReserveResult($students: [String]!) {
+        adminReserveResult(students: $students)
+    }
+`
+export const ADMIN_CONFIRM_RETURN = gql `
+    mutation adminConfirmReturn($students: [String]!) {
+        adminConfirmReturn(students: $students)
+    }
+`
+export const ADMIN_MARK_FINISH = gql `
+    mutation adminMarkFinish($students: [String]!) {
+        adminMarkFinish(students: $students)
+    }
+`
+export const ADMIN_MARK_REMOVE = gql `
+    mutation adminMarkRemove($students: [String]!) {
+        adminMarkRemove(students: $students)
+    }
+`
+export const ADMIN_MARK_FINAL_FAIL = gql `
+    mutation adminMarkFinalFail($students: [String]!, $reason: String!) {
+        adminMarkFinalFail(students: $students, reason: $reason)
+    }
+`
+export const TEACHER_REQUEST_CONFIRM_RETEST_FEE = gql`
+    mutation requestConfirmRetestPayment($students: [String]!) {
+        requestConfirmRetestPayment(students: $students)
+    }
+`
+
+export const ADM_CONFIRM_RETEST_FEE = gql `
+    mutation adminConfirmRetestFee($students: [String]!) {
+        adminConfirmRetestFee(students: $students)
+    }
+`
+export const T_REQUEST_SWAP = gql `
+    mutation requestSwap($student: String!, $replacement: String!) {
+        requestSwap(student: $student, replacement: $replacement) {
+            _id
+            randomId
+            ten
+            ngaysinh
+            anh34
+            quequan
+            cmt1
+            cmt2
+            bangcap
+            hangbang
+            mobile
+            dondk
+            giaykhamSK
+            hopdongdaotao
+            trangthai
+            ycdc {
+                ten
+                randomId
+            }
+            baoluu {
+                trangthai
+            }
+            baocao1 {
+                name
+            }
+            baocao2 {
+                name
+            }
+        }
+    }
+`
+
+export const ADM_CONFIRM_SWAP = gql `
+    mutation adminConfirmSwap($students: [String]!) {
+        adminConfirmSwap(students: $students) {
+            _id
+            randomId
+            ten
+            ngaysinh
+            anh34
+            quequan
+            cmt1
+            cmt2
+            bangcap
+            hangbang
+            mobile
+            dondk
+            giaykhamSK
+            hopdongdaotao
+            trangthai
+            ycdc {
+                ten
+                randomId
+            }
+            baoluu {
+                trangthai
+            }
+            baocao1 {
+                name
+            }
+            baocao2 {
+                name
+            }
+        }
     }
 `

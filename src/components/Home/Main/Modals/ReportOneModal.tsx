@@ -4,45 +4,49 @@ import {
     List
 } from 'antd'
 import {
-    gql,
+    // gql,
     useLazyQuery
 } from '@apollo/client'
 import LoadinCenter from '../../../common/LoadingCenter'
 
-const LOAD_A_REPORT = gql`
-    query loadAReport($filter: ReportFilter, $page: Int, $limit: Int) {
-        loadAReport(filter: $filter, page: $page, limit: $limit) {
-            reports {
-                _id
-                hangbang
-                name
-                desc
-                status
-                createdBy {
-                    name
-                },
-                stdCount
-                created
-            }
-            total
-        }
-    }
-`
+// const LOAD_A_REPORT = gql`
+//     query loadAReport($filter: ReportFilter, $page: Int, $limit: Int) {
+//         loadAReport(filter: $filter, page: $page, limit: $limit) {
+//             reports {
+//                 _id
+//                 hangbang
+//                 name
+//                 desc
+//                 status
+//                 createdBy {
+//                     name
+//                 },
+//                 stdCount
+//                 created
+//             }
+//             total
+//         }
+//     }
+// `
 
 type ModalType = {
     visible: boolean
     onCancel: () => void
     onOk: () => void,
     onMove: (report: string) => void
+    query: any
+    dataKey: string
 }
 
 const ReportListModal:React.FC<ModalType> = ({
     visible,
     onCancel,
     onOk,
-    onMove
+    onMove,
+    query,
+    dataKey
 }) => {
-    const [loadReports, { loading, data }] = useLazyQuery(LOAD_A_REPORT,{fetchPolicy: 'network-only'})
+    const [loadReports, { loading, data }] = useLazyQuery(query,{fetchPolicy: 'network-only'})
     const [moving, toggleMoving] = React.useState(false)
 
     React.useEffect(() => {
@@ -76,9 +80,9 @@ const ReportListModal:React.FC<ModalType> = ({
             {(loading || moving) && (
                 <LoadinCenter />
             )}
-            {data && data.loadAReport && (
+            {data && data[dataKey as keyof Object] && (
                 <List
-                    dataSource={data.loadAReport.reports}
+                    dataSource={data[dataKey as keyof Object].reports}
                     renderItem={(item: any) => (
                         <List.Item
                             onClick={() => moveStds(item._id)}

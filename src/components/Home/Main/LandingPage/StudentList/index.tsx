@@ -8,7 +8,10 @@ import {
 import {
     Link
 } from 'react-router-dom'
-import { LoadingOutlined } from '@ant-design/icons';
+import {
+    LoadingOutlined,
+    CheckCircleTwoTone 
+} from '@ant-design/icons';
 import './style.css'
 import status from '../../../../common/StudentStatus'
 import {
@@ -46,7 +49,12 @@ const StudentList:React.FC<cType> = ({
             title: 'Mã hồ sơ',
             dataIndex: 'randomId',
             render: (text:string, record: any) => {
-                return <span style={{ textDecoration: record.trangthai === 'DA_RUT_HS' ? 'line-through': 'none'}}>{text}</span>
+                return (
+                    <Space style={{ textDecoration: record.trangthai === 'DA_RUT_HS' ? 'line-through': 'none'}}>
+                        {record.trangthai === 'HOAN_THANH' && <CheckCircleTwoTone twoToneColor="#52c41a" /> }
+                        {text}
+                    </Space>
+                )
             }
         },
         {
@@ -83,17 +91,31 @@ const StudentList:React.FC<cType> = ({
             }
         },
         {
-            title: 'Báo cáo',
+            title: 'Báo cáo 1',
             render: (_: string, record: any) => {
                 if (record.baocao1) {
                     if (user.role === 'TEACHER') {
                         return <span>{record.baocao1.name}</span>
-                    }
-                    if (user.role === 'MANAGER' || user.role === 'ADMIN') {
+                    } else {
                         return (<Link to={`/rp1/${record.baocao1._id}`}>{record.baocao1.name}</Link>)
+
                     }
                 }
-                return (<span>NA</span>)
+                return (<span>----</span>)
+            }
+        },
+        {
+            title: 'Báo cáo 2',
+            render: (_: string, record: any) => {
+                if (record.baocao2) {
+                    if (user.role === 'TEACHER') {
+                        return <span>{record.baocao1.name}</span>
+                    }
+                    if (user.role === 'MANAGER' || user.role === 'ADMIN') {
+                        return (<Link to={`/rp1/${record.baocao2._id}`}>{record.baocao2.name}</Link>)
+                    }
+                }
+                return (<span>----</span>)
             }
         }
     ]
@@ -115,6 +137,9 @@ const StudentList:React.FC<cType> = ({
                     pagination={false}
                     rowClassName={(record:any) => {
                         if (record.trangthai === 'DA_RUT_HS') {
+                            return 'disabledStudent'
+                        }
+                        if (record.trangthai === 'DA_BO_HOC') {
                             return 'disabledStudent'
                         }
                         return ''
