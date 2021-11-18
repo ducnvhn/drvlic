@@ -8,8 +8,10 @@ import {
 import {
   LogoutOutlined,
   OrderedListOutlined,
+  SettingOutlined,
   SnippetsOutlined,
   SolutionOutlined,
+  UsergroupAddOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import {
@@ -47,6 +49,8 @@ import SingleStudent from './SingleStudent'
 import ReportOnes from './ReportOnes'
 import SingleAttReport from './SingleReportOne'
 import Profile from './Profile'
+import UserMgt from './UserMgt'
+import SingleUser from './SingleUser'
 
 const {
   // Sider,
@@ -70,9 +74,13 @@ const GET_USER = gql`
 `
 // 
 function Home() {
+  console.log('re-rendering')
   const { setUser } = useAuth()
   const history = useHistory()
-  const [loadUser, { loading, data, error }] = useLazyQuery(GET_USER)
+  const [loadUser, { loading, data, error }] = useLazyQuery(GET_USER, { onCompleted: (data: any) => {
+    const { me } = data
+    setUser(me as User)
+  }})
   // const [sider, setSider] = React.useState(false);
   const { logout } = useAuth()
   // const location = useLocation()
@@ -86,7 +94,7 @@ function Home() {
       }
     }
     load()
-  }, [loadUser, setUser, data])
+  }, [loadUser, setUser])
   
   const handleLogout = () => {
     logout()
@@ -125,19 +133,28 @@ function Home() {
                   Hồ sơ
                 </Link>
               </Menu.Item>
-              {data.me && (data.me.role === 'ADMIN' || data.me.role === 'MANAGER') && (
+              {data.me && (data.me.role === 'ADMIN' || data.me.role === 'MANAGER' || data.me.role === 'SUPER_ADMIN') && (
                 <Menu.Item key="two" icon={<OrderedListOutlined style={{ fontSize: '16px' }} />}>
                   <Link to="/rp1">
                     Báo cáo 1
                   </Link>
                 </Menu.Item>
               )}
-              {data.me && (data.me.role === 'ADMIN' || data.me.role === 'MANAGER') && (
+              {data.me && (data.me.role === 'ADMIN' || data.me.role === 'MANAGER' || data.me.role === 'SUPER_ADMIN') && (
                 <Menu.Item key="three" icon={<SolutionOutlined style={{ fontSize: '16px' }} />}>
                   <Link to="/rp2">
                     Báo cáo 2
                   </Link>
                 </Menu.Item>
+              )}
+              {data.me && (data.me.role === 'SUPER_ADMIN') && (
+                <Menu.SubMenu title="Hệ thống" icon={<SettingOutlined />}>
+                  <Menu.Item key="four" icon={<UsergroupAddOutlined />}>
+                    <Link to="/users">
+                      Người dùng
+                    </Link>
+                  </Menu.Item>
+                </Menu.SubMenu>
               )}
             </Menu>
           </div>
@@ -199,8 +216,14 @@ function Home() {
                 removeStd={REMOVE_FROM_REPORT}
               />
             </Route>
-            <Route path="/profile">
+            <Route path="/profile" exact>
               <Profile />
+            </Route>
+            <Route path="/users" exact>
+              <UserMgt />
+            </Route>
+            <Route path="/users/:id" exact>
+              <SingleUser />
             </Route>
             <Route path="/">
               <Main />

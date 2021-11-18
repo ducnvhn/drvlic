@@ -3,7 +3,8 @@ import {
     message,
     Modal,
     Row,
-    Col
+    Col,
+    Alert
 } from 'antd'
 import {
     // gql,
@@ -253,6 +254,11 @@ const SingleStudent = () => {
     }
 
     if (!loading && !error && data) {
+        if (!data.loadSingleStd) {
+            return (
+                <Alert message="Không tìm thấy người dùng" type="error" />
+            )
+        }
         return (
             <div>
                 <Header

@@ -20,6 +20,7 @@ import {
     CheckSquareOutlined,
     DeleteOutlined,
     DollarOutlined,
+    DownloadOutlined,
     EllipsisOutlined,
     ExclamationOutlined,
     FilterOutlined,
@@ -39,6 +40,7 @@ import StudentDrawer from './LandingPage/CreateStudentDrawer'
 import StudentList from './LandingPage/StudentList'
 import FilterModal from './LandingPage/CreateStudentDrawer/FilterModal'
 import ReportModal from './Modals/ReportOneModal'
+import XLSX from 'xlsx'
 import {
     REQUEST_CONFIRM_PAYMENT,
     CONFIRM_PAYMENT,
@@ -66,6 +68,8 @@ import {
     TEACHER_REQUEST_CONFIRM_RETEST_FEE,
     ADM_CONFIRM_RETEST_FEE
 } from '../../common/ClientQueries'
+import moment from 'moment'
+import StudentStatus from '../../common/StudentStatus'
 
 const CREATE_STUDENT = gql`
     mutation CreateStudentMutation($student: StudentInput!) {
@@ -159,10 +163,15 @@ const LOAD_STUDENTS = gql`
 const TLandingPage = () => {
     const { getUser } = useAuth()
     const user = getUser()
+    console.log(user)
     const pageSize=50
     const [createDrw, toggleCreateDrw] = React.useState(false)
     const [createStudent] = useMutation(CREATE_STUDENT, { refetchQueries: [LOAD_STUDENTS]})
     const [loadStudents, { loading: loadingStudents, data: students = { loadStudents: [] } }] = useLazyQuery(LOAD_STUDENTS, { fetchPolicy: 'network-only' })
+    const [exportXLSX, { loading: exporting }] = useLazyQuery(LOAD_STUDENTS, { fetchPolicy: 'network-only', onCompleted: (data: any) => {
+        const {loadStudents: { students}} = data
+        exportFile(students)
+    } })
     const [filterModal, toggleFilterModal] = React.useState(false)
     const [reportModal, toggleReportModal] = React.useState(false)
     const [bc2Modal, toggleBC2Modal] = React.useState(false)
@@ -359,81 +368,132 @@ const TLandingPage = () => {
         }
     }
 
-    const menu = () => {
-        if (user.role === 'TEACHER') {
-            return (
-                <Menu theme="dark">
-                    <Menu.Item icon={<PlusOutlined />} key="t1" onClick={() => toggleCreateDrw(!createDrw)}>
-                        Thêm hồ sơ
-                    </Menu.Item>
-                    <Menu.SubMenu key="_bc" icon={<CaretLeftFilled />} title="Yêu cầu xác nhận thanh toán">
-                        <Menu.Item icon={<DollarOutlined />} key="t2" onClick={() => doAction(requestConfirmP)}>
-                            Yêu cầu XNTT đợt 1
-                        </Menu.Item>
-                        <Menu.Item icon={<PoundOutlined />} key="t3" onClick={() => doAction(requestConfirmP2)}>
-                            Yêu cầu XNTT đợt 2
-                        </Menu.Item>
-                        <Menu.Item icon={<TransactionOutlined />} key="t4" onClick={() => doAction(tRequestCRF)}>
-                            Yêu cầu XNTT thi lại
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
-                        Yêu cầu rút hồ sơ
-                    </Menu.Item>
-                    <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
-                        Yêu cầu quay lại thi
-                    </Menu.Item>
-                </Menu>
-            )
-        }
-        if (user.role === 'ADMIN') {
-            return (
-                <Menu theme="dark">
-                    <Menu.SubMenu key="A1" icon={<CaretLeftFilled />} title="Báo cáo ">
-                        <Menu.Item icon={<OrderedListOutlined />} key="_a2" onClick={() => toggleReportModal(true)}>
-                            Chuyển báo cáo 1
-                        </Menu.Item>
-                        <Menu.Item icon={<UnorderedListOutlined />} key="_a3" onClick={() => toggleBC2Modal(true)}>
-                            Chuyển báo cáo 2
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.SubMenu key="_course" icon={<CaretLeftFilled />} title="Khóa học">
-                        <Menu.Item icon={<CheckOutlined />} key="_a4" onClick={() => doAction(markComplete)}>
-                            Đánh dấu hoàn thành khóa học
-                        </Menu.Item>
-                        <Menu.Item icon={<DeleteOutlined />} key="_a5" onClick={() => doActionWithConfirm(admMarkRemove, 'Hủy Hồ sơ | bỏ học', 'Bạn có chắc muốn hủy các hồ sơ đã chọn?')}>
-                            Hủy hồ sơ / bỏ học
-                        </Menu.Item>
-                        <Menu.Item icon={<CheckSquareOutlined />} key="_a6" onClick={() => doAction(markGrad)}>
-                            Đánh dấu Đã tốt nghiệp
-                        </Menu.Item>
-                        <Menu.Item icon={<ExclamationOutlined />} key="_a7" onClick={() => doAction(markFail)}>
-                            Đánh dấu trượt TN
-                        </Menu.Item>
-                        <Menu.Item icon={<RetweetOutlined />} key="_a8" onClick={() => doAction(markforretest)}>
-                            Vào danh sách thi lại TN
-                        </Menu.Item>
+    const exportFile = (data: any) => {
+        // console.log('exporting....')
+        const ws = XLSX.utils.json_to_sheet(data.map((std:Record<string,any>) => ({
+            'Mã Hồ sơ': std.randomId,
+            'Tên': std.ten,
+            'Ngày Sinh': moment(parseFloat(std.ngaysinh)).format('DD/MM/YYYY'),
+            'Hạng bằng lái': std.hangbang,
+            'Số điện thoại': std.mobile,
+            'Trạng thái hồ sơ': StudentStatus[std.trangthai],
+            'Ngày tạo hồ sơ': moment(parseFloat(std.created)).format('DD/MM/YYYY'),
+        })))
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, 'Danh sach')
+        XLSX.writeFile(wb, 'danhsach.xlsx')
+    }
 
-                        <Menu.Item icon={<UnorderedListOutlined />} key="_a9" onClick={() => doActionWithConfirm(reserveResult, 'Bảo lưu kết quả', 'Bạn có chắc muốn bảo lưu kết quả cho các hồ sơ đã chọn?')}>
-                            Bảo lưu kết quả
-                        </Menu.Item>
-                        <Menu.Item icon={<ReloadOutlined />} key="_a10" onClick={() => doActionWithConfirm(admConfirmReturn, 'Xác nhận quay lại', 'Xác nhận cho các hồ sơ đang bảo lưu quay lại thi')}>
-                            Xác nhận quay lại thi
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.SubMenu key="_failed" icon={<CaretLeftFilled />} title="Thi trượt">
-                        <Menu.Item key="a11" onClick={() => confirmFinalFail('THI_TRUOT_LT')}>Thi trượt lý thuyết</Menu.Item>
-                        <Menu.Item key="a12" onClick={() => confirmFinalFail('THI_TRUOT_SH')}>Thi trượt Sa hình</Menu.Item>
-                        <Menu.Item key="a13" onClick={() => confirmFinalFail('THI_TRUOT_DT')}>Thi trượt đường trường</Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.Item icon={<CheckCircleOutlined color="green" />} key="_a14" onClick={() => doActionWithConfirm(admMarkFinish, 'Xác nhận Hoàn thành', 'Xác nhận cho các hồ sơ đã chọn hoàn thành khóa học')}>
-                        Xác nhận Hoàn thành
+    const onExportClick = async () => {
+        await exportXLSX({
+            variables: {
+                filter,
+                page: 1,
+                limit: 10000
+            }
+        })
+    }
+    let MenuOption = (<Menu />)
+    if (user.role === 'TEACHER') {
+        MenuOption = (
+            <Menu theme="dark">
+                <Menu.Item icon={<PlusOutlined />} key="t1" onClick={() => toggleCreateDrw(!createDrw)}>
+                    Thêm hồ sơ
+                </Menu.Item>
+                <Menu.SubMenu key="_bc" icon={<CaretLeftFilled />} title="Yêu cầu xác nhận thanh toán">
+                    <Menu.Item icon={<DollarOutlined />} key="t2" onClick={() => doAction(requestConfirmP)}>
+                        Yêu cầu XNTT đợt 1
                     </Menu.Item>
-                </Menu>
-            )
-        }
+                    <Menu.Item icon={<PoundOutlined />} key="t3" onClick={() => doAction(requestConfirmP2)}>
+                        Yêu cầu XNTT đợt 2
+                    </Menu.Item>
+                    <Menu.Item icon={<TransactionOutlined />} key="t4" onClick={() => doAction(tRequestCRF)}>
+                        Yêu cầu XNTT thi lại
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
+                    Yêu cầu rút hồ sơ
+                </Menu.Item>
+                <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
+                    Yêu cầu quay lại thi
+                </Menu.Item>
+            </Menu>
+        )
+    }
+    if (user.role === 'TEACHER') {
+        MenuOption = (
+            <Menu theme="dark">
+                <Menu.Item icon={<PlusOutlined />} key="t1" onClick={() => toggleCreateDrw(!createDrw)}>
+                    Thêm hồ sơ
+                </Menu.Item>
+                <Menu.SubMenu key="_bc" icon={<CaretLeftFilled />} title="Yêu cầu xác nhận thanh toán">
+                    <Menu.Item icon={<DollarOutlined />} key="t2" onClick={() => doAction(requestConfirmP)}>
+                        Yêu cầu XNTT đợt 1
+                    </Menu.Item>
+                    <Menu.Item icon={<PoundOutlined />} key="t3" onClick={() => doAction(requestConfirmP2)}>
+                        Yêu cầu XNTT đợt 2
+                    </Menu.Item>
+                    <Menu.Item icon={<TransactionOutlined />} key="t4" onClick={() => doAction(tRequestCRF)}>
+                        Yêu cầu XNTT thi lại
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
+                    Yêu cầu rút hồ sơ
+                </Menu.Item>
+                <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
+                    Yêu cầu quay lại thi
+                </Menu.Item>
+            </Menu>
+        )
+    }
+    if (user.role === 'ADMIN') {
+        MenuOption = (
+            <Menu theme="dark">
+                <Menu.SubMenu key="A1" icon={<CaretLeftFilled />} title="Báo cáo ">
+                    <Menu.Item icon={<OrderedListOutlined />} key="_a2" onClick={() => toggleReportModal(true)}>
+                        Chuyển báo cáo 1
+                    </Menu.Item>
+                    <Menu.Item icon={<UnorderedListOutlined />} key="_a3" onClick={() => toggleBC2Modal(true)}>
+                        Chuyển báo cáo 2
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.SubMenu key="_course" icon={<CaretLeftFilled />} title="Khóa học">
+                    <Menu.Item icon={<CheckOutlined />} key="_a4" onClick={() => doAction(markComplete)}>
+                        Đánh dấu hoàn thành khóa học
+                    </Menu.Item>
+                    <Menu.Item icon={<DeleteOutlined />} key="_a5" onClick={() => doActionWithConfirm(admMarkRemove, 'Hủy Hồ sơ | bỏ học', 'Bạn có chắc muốn hủy các hồ sơ đã chọn?')}>
+                        Hủy hồ sơ / bỏ học
+                    </Menu.Item>
+                    <Menu.Item icon={<CheckSquareOutlined />} key="_a6" onClick={() => doAction(markGrad)}>
+                        Đánh dấu Đã tốt nghiệp
+                    </Menu.Item>
+                    <Menu.Item icon={<ExclamationOutlined />} key="_a7" onClick={() => doAction(markFail)}>
+                        Đánh dấu trượt TN
+                    </Menu.Item>
+                    <Menu.Item icon={<RetweetOutlined />} key="_a8" onClick={() => doAction(markforretest)}>
+                        Vào danh sách thi lại TN
+                    </Menu.Item>
+
+                    <Menu.Item icon={<UnorderedListOutlined />} key="_a9" onClick={() => doActionWithConfirm(reserveResult, 'Bảo lưu kết quả', 'Bạn có chắc muốn bảo lưu kết quả cho các hồ sơ đã chọn?')}>
+                        Bảo lưu kết quả
+                    </Menu.Item>
+                    <Menu.Item icon={<ReloadOutlined />} key="_a10" onClick={() => doActionWithConfirm(admConfirmReturn, 'Xác nhận quay lại', 'Xác nhận cho các hồ sơ đang bảo lưu quay lại thi')}>
+                        Xác nhận quay lại thi
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.SubMenu key="_failed" icon={<CaretLeftFilled />} title="Thi trượt">
+                    <Menu.Item key="a11" onClick={() => confirmFinalFail('THI_TRUOT_LT')}>Thi trượt lý thuyết</Menu.Item>
+                    <Menu.Item key="a12" onClick={() => confirmFinalFail('THI_TRUOT_SH')}>Thi trượt Sa hình</Menu.Item>
+                    <Menu.Item key="a13" onClick={() => confirmFinalFail('THI_TRUOT_DT')}>Thi trượt đường trường</Menu.Item>
+                </Menu.SubMenu>
+                <Menu.Item icon={<CheckCircleOutlined color="green" />} key="_a14" onClick={() => doActionWithConfirm(admMarkFinish, 'Xác nhận Hoàn thành', 'Xác nhận cho các hồ sơ đã chọn hoàn thành khóa học')}>
+                    Xác nhận Hoàn thành
+                </Menu.Item>
+            </Menu>
+        )
+    }
         if (user.role === 'FINANCE') {
-            return (
+            MenuOption = (
                 <Menu theme="dark">
                     <Menu.SubMenu key="f1" icon={<CaretLeftFilled />} title="Xác nhận thanh toán">
                         <Menu.Item icon={<DollarOutlined />} key="_f2" onClick={() => doAction(confirmP)}>
@@ -456,7 +516,7 @@ const TLandingPage = () => {
             )
         }
         if (user.role === 'MANAGER') {
-            return (
+            MenuOption = (
                 <Menu theme="dark">
                     <Menu.Item icon={<CheckCircleOutlined />} key="_m1" onClick={() => doAction(acceptWDGD)}>
                         Chấp thuận rút HS
@@ -467,40 +527,12 @@ const TLandingPage = () => {
                 </Menu>
             )
         }
-        return (
-            <Menu />
-        )
-    }
 
-    // const onRequestComplete = (data:any) => {
-    //     // console.log(data)
-    //     if (data && data.loadStudents) {
-    //         const { loadStudents: { students } } = data
-    //         // console.log(students)
-    //         const worksheet = XLSX.utils.json_to_sheet(students)
-    //         const new_workbook = XLSX.utils.book_new()
-    //         XLSX.utils.book_append_sheet(new_workbook, worksheet, "SheetJS")
-    //         XLSX.writeFile(new_workbook, 'out.xlsx')
-    //     }
-    // }
-    // const exportStds = async () => {
-    //     // console.log('export to excel')
-    //     try {
-    //         await exportList({
-    //             variables: {
-    //                 filter,
-    //                 page: 1,
-    //                 limit: 10000
-    //             },
-    //         })
-            
-    //     } catch (e) {
-    //         console.log(e)
-    //         message.error('Không thể tải được dữ liệu')
-    //     }
-    // }
 
     const extras = [
+        <Tooltip key="_exprt" title="Tải xuống file Excel">
+            <Button loading={exporting} shape="round" type="text" icon={<DownloadOutlined />} onClick={() => onExportClick()} />
+        </Tooltip>,
         <Tooltip key="_filt" title={notFilterEmpty() ? 'Bỏ bộ lọc' : 'Lọc hồ sơ'}>
             <Button
                 danger={notFilterEmpty() || false}
@@ -518,7 +550,7 @@ const TLandingPage = () => {
                 <ReloadOutlined />
             </Button>
         </Tooltip>,
-        <Dropdown trigger={['hover']} key="_options" overlay={menu}>
+        <Dropdown trigger={['click']} key="_options" overlay={MenuOption}>
             <Tooltip title="Chức năng">
                 <Button type="primary" icon={<EllipsisOutlined />} loading={working} />
             </Tooltip>
@@ -528,7 +560,7 @@ const TLandingPage = () => {
     return (
         <div>
             <PageHeader
-                title="Danh sách hồ sơ"
+                title={`Danh sách hồ sơ`}
                 extra={extras}
             />
             <StudentList
