@@ -88,10 +88,10 @@ function Home() {
   React.useEffect(() => {
     const load = async () => {
       await  loadUser()
-      if (data) {
-        const { me } = data
-        setUser(me as User)
-      }
+      // if (data) {
+      //   const { me } = data
+      //   setUser(me as User)
+      // }
     }
     load()
   }, [loadUser, setUser])

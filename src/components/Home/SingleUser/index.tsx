@@ -71,11 +71,6 @@ const RESET_PWD = gql `
         }
     }
 `
-const DELETE_USER = gql `
-    mutation deleteUser($_id: String!) {
-        deleteUser(_id: $_id)
-    }
-`
 
 const SingleUser = () => {
     const params:any = useParams()

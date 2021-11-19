@@ -7,7 +7,7 @@ import {
 import UsersList from './MainComps/UsersList'
 import LoadinCenter from '../../common/LoadingCenter'
 import Header from './MainComps/Header'
-import { Modal } from 'antd'
+// import { Modal } from 'antd'
 
 const LOAD_USERS = gql `
     query loadUsers($filter: UserFilter, $page: Int, $limit: Int) {
