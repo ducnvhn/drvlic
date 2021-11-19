@@ -1,4 +1,5 @@
 {
+  "homepage": "https://ducnvhn.github.io/drvlic/",
   "name": "tsapp",
   "version": "0.1.0",
   "private": true,
@@ -22,6 +23,7 @@
     "antd-img-crop": "^3.16.0",
     "apollo-upload-client": "^16.0.0",
     "date-fns": "^2.23.0",
+    "gh-pages": "^3.2.3",
     "graphql": "^15.5.2",
     "moment": "^2.29.1",
     "react": "^17.0.2",
@@ -37,6 +39,8 @@
     "yup": "^0.32.9"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
