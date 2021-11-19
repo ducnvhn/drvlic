@@ -6,19 +6,19 @@
     "runtime-main.js": "/drvlic/static/js/runtime-main.1677fbbf.js",
     "runtime-main.js.map": "/drvlic/static/js/runtime-main.1677fbbf.js.map",
     "static/css/2.a95be28f.chunk.css": "/drvlic/static/css/2.a95be28f.chunk.css",
-    "static/js/2.6a110754.chunk.js": "/drvlic/static/js/2.6a110754.chunk.js",
-    "static/js/2.6a110754.chunk.js.map": "/drvlic/static/js/2.6a110754.chunk.js.map",
+    "static/js/2.be020c43.chunk.js": "/drvlic/static/js/2.be020c43.chunk.js",
+    "static/js/2.be020c43.chunk.js.map": "/drvlic/static/js/2.be020c43.chunk.js.map",
     "static/js/3.6a93a211.chunk.js": "/drvlic/static/js/3.6a93a211.chunk.js",
     "static/js/3.6a93a211.chunk.js.map": "/drvlic/static/js/3.6a93a211.chunk.js.map",
     "index.html": "/drvlic/index.html",
     "static/css/2.a95be28f.chunk.css.map": "/drvlic/static/css/2.a95be28f.chunk.css.map",
     "static/css/main.d4ab3a48.chunk.css.map": "/drvlic/static/css/main.d4ab3a48.chunk.css.map",
-    "static/js/2.6a110754.chunk.js.LICENSE.txt": "/drvlic/static/js/2.6a110754.chunk.js.LICENSE.txt"
+    "static/js/2.be020c43.chunk.js.LICENSE.txt": "/drvlic/static/js/2.be020c43.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.1677fbbf.js",
     "static/css/2.a95be28f.chunk.css",
-    "static/js/2.6a110754.chunk.js",
+    "static/js/2.be020c43.chunk.js",
     "static/css/main.d4ab3a48.chunk.css",
     "static/js/main.80eb0a39.chunk.js"
   ]
