@@ -56,7 +56,8 @@ import {
     ADMIN_MARK_FINAL_FAIL,
     TEACHER_REQUEST_CONFIRM_RETEST_FEE,
     ADM_CONFIRM_RETEST_FEE,
-    ADM_CONFIRM_SWAP
+    ADM_CONFIRM_SWAP,
+    FORCE_STATUS
 } from '../../common/ClientQueries'
 import StudentTimeline from './StudentInfo/Timeline'
 
@@ -108,6 +109,7 @@ const SingleStudent = () => {
     const [tRequestCRF] = useMutation(TEACHER_REQUEST_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_SINGLE_STD] })
     const [fnConfirmRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_SINGLE_STD] })
     const [admConfirmSwp] = useMutation(ADM_CONFIRM_SWAP, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [forceStatus] = useMutation(FORCE_STATUS, { refetchQueries: [LOAD_SINGLE_STD] })
     
     const commands:Record<string,any> = {
         'requestConfirmPayment': requestConfirmPayment,
@@ -140,7 +142,8 @@ const SingleStudent = () => {
         'admMarkFFail': admMarkFFail,
         'tRequestCRF': tRequestCRF,
         'fnConfirmRF': fnConfirmRF,
-        'admConfirmSwp': admConfirmSwp
+        'admConfirmSwp': admConfirmSwp,
+        // 'forceStatus': forceStatus
     }
 
     React.useEffect(() => {
@@ -189,6 +192,19 @@ const SingleStudent = () => {
         }
     }
 
+    const changeStatus = async (students: string[], trangthai: string) => {
+        try {
+            await forceStatus({
+                variables: {
+                    students,
+                    trangthai
+                }
+            })
+            message.success('Thay đổi trạng thái thành công')
+        } catch (error) {
+            message.error('Đã có lỗi xẩy ra - không thể thay đổi trạng thái hồ sơ')
+        }
+    }
 
     if (loading) {
         return <span>....loading</span>
@@ -279,6 +295,7 @@ const SingleStudent = () => {
                             }
                         })
                     }}
+                    changeStatus={changeStatus}
                 />
                 <Row>
                     <Col sm={24} md={12}>

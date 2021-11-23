@@ -28,7 +28,8 @@ import {
     // CaretRightFilled,
     CaretLeftFilled,
     PoundOutlined,
-    SwapOutlined
+    SwapOutlined,
+    FieldTimeOutlined
 } from '@ant-design/icons'
 import {
     useHistory
@@ -41,6 +42,19 @@ import {
     LOAD_B_REPORTS,
     // ADM_CONFIRM_SWAP
 } from '../../common/ClientQueries'
+import ForceStatusModal from './Modals/ForceStatusModal'
+import {
+    useMutation
+} from '@apollo/client'
+import {
+    LOAD_SINGLE_STD,
+    CONFIRM_PAYMENT,
+    CONFIRM_PAYMENT_TWO,
+    ADM_CONFIRM_RETEST_FEE,
+    CONFIRM_WITHDRAW
+} from '../../common/ClientQueries'
+import CPModal from '../Main/Modals/ConfirmPaymentModal'
+import RefundModal from '../Main/Modals/RefundList'
 // import { Moment } from 'moment'
 
 type CType = {
@@ -54,6 +68,7 @@ type CType = {
     movetoR2: (students: string[], report: string) => void
     confirmAction: (action: string, students: string[], modalTitle: string, modalContent: string) => void
     markFailed: (students: string[], reason: string) => void
+    changeStatus: (students: string[], reason: string) => void
 }
 
 
@@ -67,7 +82,8 @@ const Header:React.FC<CType> = ({
     doAction,
     movetoR2,
     confirmAction,
-    markFailed
+    markFailed,
+    changeStatus
 }) => {
     const [reportModal, toggleReportModal] = React.useState(false)
     const [reservModal, toggleReservModal] = React.useState(false)
@@ -76,6 +92,16 @@ const Header:React.FC<CType> = ({
     // const [acceptRsvModal, toggleAcceptRsvModal] = React.useState(false)
     const [r2Modal, toggleR2Modal] = React.useState(false)
     const [swapModal, toggleSwapModal] = React.useState(false)
+    const [statusModal, toggleStatusModal] = React.useState(false)
+    const [cpModal, toggleCPModal] = React.useState(false)
+    const [refundModal, toggleRefundModal] = React.useState(false)
+    const [confirmCMD, setConfirmCMD] = React.useState('')
+    const [cpTitle, setCPTitle] = React.useState('')
+    const [confirmP1] = useMutation(CONFIRM_PAYMENT, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [confirmP2] = useMutation(CONFIRM_PAYMENT_TWO, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [admCFRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [confirmWithdraw] = useMutation(CONFIRM_WITHDRAW, { refetchQueries: [LOAD_SINGLE_STD]})
+    const selected = [student._id]
 
     const history = useHistory()
     const createMenu = () => {
@@ -125,23 +151,53 @@ const Header:React.FC<CType> = ({
         // finance actions - 
         if (role === 'FINANCE') {
             if (trangthai === 'CHO_XAC_NHAN_TT1') {
-                items.push(<Menu.Item key="F_confirmP1" icon={<CheckOutlined />} onClick={() => doAction('confirmPayment',[_id])}>Xác nhận thanh toán đợt 1</Menu.Item>)
+                // items.push(<Menu.Item key="F_confirmP1" icon={<CheckOutlined />} onClick={() => doAction('confirmPayment',[_id])}>Xác nhận thanh toán đợt 1</Menu.Item>)
+                items.push(<Menu.Item key="F_confirmP1" icon={<CheckOutlined />} onClick={() => {
+                    setCPTitle("Xác nhận thanh toán đợt một")
+                    setConfirmCMD('paymentOne')
+                    toggleCPModal(true)
+                }}>Xác nhận thanh toán đợt 1</Menu.Item>)
             }
             if (trangthai === 'CHO_XAC_NHAN_TT2') {
-                items.push(<Menu.Item key="F_confirmP2" icon={<CheckCircleFilled />} onClick={() => doAction('confirmPaymentTwo',[_id])}>Xác nhận thanh toán đợt 2</Menu.Item>)
+                // items.push(<Menu.Item key="F_confirmP2" icon={<CheckCircleFilled />} onClick={() => doAction('confirmPaymentTwo',[_id])}>Xác nhận thanh toán đợt 2</Menu.Item>)
+                items.push(<Menu.Item key="F_confirmP2" icon={<CheckCircleFilled />} onClick={() => {
+                    setCPTitle("Xác nhận thanh toán đợt hai")
+                    setConfirmCMD('paymentTwo')
+                    toggleCPModal(true)
+                }}>Xác nhận thanh toán đợt 2</Menu.Item>)
             }
             if (trangthai === 'CHO_XN_HOAN_HUY_FN') {
-                items.push(<Menu.Item key="F_acceptwd" icon={<CheckCircleFilled />} onClick={() => doAction('confirmWithdraw',[_id])}>Chấp thuận rút HS</Menu.Item>)
+                // items.push(<Menu.Item key="F_acceptwd" icon={<CheckCircleFilled />} onClick={() => doAction('confirmWithdraw',[_id])}>Chấp thuận rút HS</Menu.Item>)
+                items.push(<Menu.Item key="F_acceptwd" icon={<CheckCircleFilled />} onClick={() => {
+                    setCPTitle("Hoàn tiền rút hồ sơ")
+                    setConfirmCMD('confirmWithdraw')
+                    toggleCPModal(true)
+                }}>Chấp thuận rút HS</Menu.Item>)
                 items.push(<Menu.Item key="F_rjctwd" onClick={() => doAction('rejectWDFN',[_id])}>Không Chấp thuận rút HS</Menu.Item>)
             }
             if (trangthai === 'CHO_XNTT_TL_LT') {
-                items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => doAction('fnConfirmRF',[_id])}>Xác nhận phí thi lại lý thuyết</Menu.Item>)
+                // items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => doAction('fnConfirmRF',[_id])}>Xác nhận phí thi lại lý thuyết</Menu.Item>)
+                items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => {
+                    setCPTitle("Xác nhận thanh toán thi lại lý thuyết")
+                    setConfirmCMD('admCFRF')
+                    toggleCPModal(true)
+                }}>Xác nhận phí thi lại lý thuyết</Menu.Item>)
             }
             if (trangthai === 'CHO_XNTT_TL_SH') {
-                items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => doAction('fnConfirmRF',[_id])}>Xác nhận phí thi lại sa hình</Menu.Item>)
+                // items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => doAction('fnConfirmRF',[_id])}>Xác nhận phí thi lại sa hình</Menu.Item>)
+                items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => {
+                    setCPTitle("Xác nhận thanh toán thi lại Sa hình")
+                    setConfirmCMD('admCFRF')
+                    toggleCPModal(true)
+                }}>Xác nhận phí thi lại sa hình</Menu.Item>)
             }
             if (trangthai === 'CHO_XNTT_TL_DT') {
-                items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => doAction('fnConfirmRF',[_id])}>Xác nhận phí thi lại đường trường</Menu.Item>)
+                // items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => doAction('fnConfirmRF',[_id])}>Xác nhận phí thi lại đường trường</Menu.Item>)
+                items.push(<Menu.Item key="F_cfrf" icon={<CheckOutlined />} onClick={() => {
+                    setCPTitle("Xác nhận thanh toán thi lại Đường trường")
+                    setConfirmCMD('admCFRF')
+                    toggleCPModal(true)
+                }}>Xác nhận phí thi lại đường trường</Menu.Item>)
             }
         }
         // admin actions--
@@ -190,8 +246,16 @@ const Header:React.FC<CType> = ({
             }
         }
         if (role === 'MANAGER') {
-            items.push(<Menu.Item icon={<CheckOutlined />} key="_gd1" onClick={() => doAction('confirmWDGD',[_id])}>Chấp thuận rút HS</Menu.Item>)
+            // items.push(<Menu.Item icon={<CheckOutlined />} key="_gd1" onClick={() => doAction('confirmWDGD',[_id])}>Chấp thuận rút HS</Menu.Item>)
+            items.push(<Menu.Item icon={<CheckOutlined />} key="_gd1" onClick={() => {
+                toggleRefundModal(true)
+            }}>
+                Chấp thuận rút HS
+            </Menu.Item>)
             items.push(<Menu.Item icon={<DeleteOutlined />} key="_gd2" onClick={() => doAction('rejectWDGD',[_id])}>Không chấp thuận rút HS</Menu.Item>)
+        }
+        if (role === 'SUPER_ADMIN') {
+            items.push(<Menu.Item icon={<FieldTimeOutlined />} key="_spa1" onClick={() => toggleStatusModal(true)}>Đặt lại trạng thái hồ sơ</Menu.Item>)
         }
         const menu = (
             <Dropdown
@@ -233,25 +297,11 @@ const Header:React.FC<CType> = ({
         await movetoR2([student._id], report)
     }
 
-    // const confirmReservBC1 = async (students: string[]) => {
-    //     Modal.confirm({
-    //         visible: rModal,
-    //         onCancel: () => toggleRModal(false),
-    //         onOk: async () => {
-    //             await doAction('requestReserve',students)
-    //         },
-    //         title: 'Bạn có muốn bảo lưu hồ sơ này?'
-    //     })
-    // }
-
-    // const onConfirmRequestResrv = async (students: string[]) => {
-    //     Modal.confirm({
-    //         visible: acceptRsvModal,
-    //         onCancel: () => toggleAcceptRsvModal(false),
-    //         onOk: async () => doAction('confirmReserve',students),
-    //         title: "Xác nhận yêu cầu bảo lưu học viên của giáo viên"
-    //     })
-    // }
+    const switchStatus = async (trangthai: string) => {
+        // const { _id } = student
+        await changeStatus([student._id], trangthai)
+        toggleStatusModal(false)
+    }
     
     return (
         <div>
@@ -286,6 +336,31 @@ const Header:React.FC<CType> = ({
                 visible={swapModal}
                 onCancel={() => toggleSwapModal(false)}
                 onOk={() => toggleSwapModal(false)}
+            />
+            <ForceStatusModal
+                visible={statusModal}
+                onCancel={()=>toggleStatusModal(false)}
+                onOk={(trangthai: string) => switchStatus(trangthai)}
+            />
+            <CPModal
+                visible={cpModal}
+                onCancel={() => toggleCPModal(false)}
+                onOk={() => toggleCPModal(false)}
+                title={cpTitle}
+                confirm={{
+                    'paymentOne': confirmP1,
+                    'paymentTwo': confirmP2,
+                    'admCFRF': admCFRF,
+                    'confirmWithdraw': confirmWithdraw
+                }}
+                command={confirmCMD}
+                selected={selected}
+            />
+            <RefundModal
+                visible={refundModal}
+                onCancel={() => toggleRefundModal(false)}
+                students={[student]}
+                onOk={() => doAction('confirmWDGD', [student._id])}
             />
         </div>
     )

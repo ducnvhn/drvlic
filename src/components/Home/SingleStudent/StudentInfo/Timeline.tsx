@@ -15,6 +15,7 @@ import {
     // ExclamationCircleTwoTone,
     RightCircleOutlined
 } from '@ant-design/icons'
+import StudentStatus from '../../../common/StudentStatus'
 
 const status = [
     'MOI_TAO',
@@ -81,7 +82,14 @@ const StudentTimeline:React.FC<Ctype> = ({
                         Icon = <ClockCircleOutlined style={{ color: 'darkmagenta'}} />
                     }
                     return (
-                        <Timeline.Item dot={Icon} key={h.date} label={moment(parseFloat(h.date)).format('DD/MM/YYYY')}>{h.reason}</Timeline.Item>
+                        <Timeline.Item
+                            dot={Icon}
+                            key={h.date}
+                            label={moment(parseFloat(h.date)).format('DD/MM/YYYY')}
+                        >
+                            <strong>{StudentStatus[h.state]}</strong><br />
+                            {h.reason}
+                        </Timeline.Item>
                     )
                 })}
             </Timeline>

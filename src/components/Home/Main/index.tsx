@@ -70,6 +70,8 @@ import {
 } from '../../common/ClientQueries'
 import moment from 'moment'
 import StudentStatus from '../../common/StudentStatus'
+import CPModal from './Modals/ConfirmPaymentModal'
+import RefundModal from './Modals/RefundList'
 
 const CREATE_STUDENT = gql`
     mutation CreateStudentMutation($student: StudentInput!) {
@@ -110,8 +112,8 @@ const CREATE_STUDENT = gql`
     }
 `
 const LOAD_STUDENTS = gql`
-    query LoadStudents($filter: FilterInput, $page: Int, $limit: Int) {
-        loadStudents(filter: $filter, page: $page, limit: $limit) {
+    query LoadStudents($filter: FilterInput, $page: Int, $limit: Int, $sort: StdSortInput) {
+        loadStudents(filter: $filter, page: $page, limit: $limit, sort: $sort) {
             total
             students {
                 _id
@@ -130,6 +132,8 @@ const LOAD_STUDENTS = gql`
                 hopdongdaotao
                 trangthai
                 mobile
+                # ycdc
+                refund
                 baocao1 {
                     name
                     _id
@@ -163,11 +167,11 @@ const LOAD_STUDENTS = gql`
 const TLandingPage = () => {
     const { getUser } = useAuth()
     const user = getUser()
-    console.log(user)
-    const pageSize=50
+    // console.log(user)
+    const pageSize=100
     const [createDrw, toggleCreateDrw] = React.useState(false)
     const [createStudent] = useMutation(CREATE_STUDENT, { refetchQueries: [LOAD_STUDENTS]})
-    const [loadStudents, { loading: loadingStudents, data: students = { loadStudents: [] } }] = useLazyQuery(LOAD_STUDENTS, { fetchPolicy: 'network-only' })
+    const [loadStudents, { loading: loadingStudents, data: students = { loadStudents: { students: [], total: 0} } }] = useLazyQuery(LOAD_STUDENTS, { fetchPolicy: 'network-only' })
     const [exportXLSX, { loading: exporting }] = useLazyQuery(LOAD_STUDENTS, { fetchPolicy: 'network-only', onCompleted: (data: any) => {
         const {loadStudents: { students}} = data
         exportFile(students)
@@ -203,6 +207,7 @@ const TLandingPage = () => {
     const [admMarkFinalFail] = useMutation(ADMIN_MARK_FINAL_FAIL, { refetchQueries: [LOAD_STUDENTS] })
     const [tRequestCRF] = useMutation(TEACHER_REQUEST_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_STUDENTS] })
     const [admCFRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_STUDENTS] })
+    const [refundModal, toggleRefundModal] = React.useState(false)
 
     const [filter, setFilter] = React.useState<Record<string,any>>({
         ten: null,
@@ -211,10 +216,16 @@ const TLandingPage = () => {
         randomId: null,
         trangthai: null
     })
+    const [sort, setSort] = React.useState<Record<string,any>>({
+        created: -1
+    })
     const [currentPage, setCurrentPage] = React.useState(1)
     const [selected, setSelected] = React.useState<string[]>([])
     const [working, toggleWorking] = React.useState(false)
     const [withdrawModal, toggleWDRModal] = React.useState(false)
+    const [cpModal, toggleCPModal] = React.useState(false)
+    const [cpModalTitle, setCPModalTitle] = React.useState('Xác nhận thanh toán')
+    const [confirmCmd, setConfirmCmd] = React.useState<string|null>(null)
 
     React.useEffect(() => {
         const load = async () => {
@@ -222,12 +233,13 @@ const TLandingPage = () => {
                 variables: {
                     filter,
                     page: currentPage,
-                    limit: pageSize
+                    limit: pageSize,
+                    sort
                 }
             })
         }
         load()
-    }, [loadStudents, filter, currentPage])
+    }, [loadStudents, filter, currentPage, sort])
     
     const createStd = async (student: any) => {
         await createStudent({
@@ -492,41 +504,66 @@ const TLandingPage = () => {
             </Menu>
         )
     }
-        if (user.role === 'FINANCE') {
-            MenuOption = (
-                <Menu theme="dark">
-                    <Menu.SubMenu key="f1" icon={<CaretLeftFilled />} title="Xác nhận thanh toán">
-                        <Menu.Item icon={<DollarOutlined />} key="_f2" onClick={() => doAction(confirmP)}>
-                            Xác nhận thanh toán đợt 1
-                        </Menu.Item>
-                        <Menu.Item icon={<PoundOutlined />} key="_f3" onClick={() => doAction(confirmP2)}>
-                            Xác nhận thanh toán đợt 2
-                        </Menu.Item>
-                        <Menu.Item icon={<CheckCircleOutlined />} key="_f4" onClick={() => doActionWithConfirm(admCFRF, 'Xác nhận Thanh toán', 'Xác nhận thanh toán thi lại cho hồ sơ thi trượt?')}>
-                            Xác nhận thanh toán thi lại
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.Item icon={<CheckCircleOutlined />} key="_f5" onClick={() => doAction(cfWithdraw)}>
-                        Chấp thuận rút HS
+    if (user.role === 'FINANCE') {
+        MenuOption = (
+            <Menu theme="dark">
+                <Menu.SubMenu key="f1" icon={<CaretLeftFilled />} title="Xác nhận thanh toán">
+                    <Menu.Item icon={<DollarOutlined />} key="_f2" onClick={() => {
+                        setCPModalTitle('Xác nhận thanh toán đợt một')
+                        setConfirmCmd('paymentOne')
+                        toggleCPModal(true)
+                    }}>
+                        Xác nhận thanh toán đợt 1
                     </Menu.Item>
-                    <Menu.Item icon={<DeleteOutlined />} key="_f6" onClick={() => doAction(rejectWDFN)}>
-                        Không chấp thuận rút HS
+                    {/* <Menu.Item icon={<DollarOutlined />} key="_f2" onClick={() => doAction(confirmP)}>
+                        Xác nhận thanh toán đợt 1
+                    </Menu.Item> */}
+                    <Menu.Item icon={<PoundOutlined />} key="_f3" onClick={() => {
+                        setCPModalTitle('Xác nhận thanh toán đợt hai')
+                        setConfirmCmd('paymentTwo')
+                        toggleCPModal(true)
+                    }}>
+                        Xác nhận thanh toán đợt 2
                     </Menu.Item>
-                </Menu>
-            )
-        }
-        if (user.role === 'MANAGER') {
-            MenuOption = (
-                <Menu theme="dark">
-                    <Menu.Item icon={<CheckCircleOutlined />} key="_m1" onClick={() => doAction(acceptWDGD)}>
-                        Chấp thuận rút HS
+                    <Menu.Item icon={<CheckCircleOutlined />} key="_f4" onClick={() => {
+                        setCPModalTitle('Xác nhận thanh toán thi lại')
+                        setConfirmCmd('admCFRF')
+                        toggleCPModal(true)
+                    }}>
+                        Xác nhận thanh toán thi lại
                     </Menu.Item>
-                    <Menu.Item icon={<DeleteOutlined />} key="_m2" onClick={() => doAction(rejectWDGD)}>
-                        Không chấp thuận rút HS
-                    </Menu.Item>
-                </Menu>
-            )
-        }
+                </Menu.SubMenu>
+                <Menu.Item icon={<CheckCircleOutlined />} key="_f5" onClick={() =>{
+                    setCPModalTitle('Xác nhận hoàn tiền rút hồ sơ')
+                    setConfirmCmd('cfWithdraw')
+                    toggleCPModal(true)
+                }}>
+                    Chấp thuận rút HS
+                </Menu.Item>
+                {/* <Menu.Item icon={<CheckCircleOutlined />} key="_f5" onClick={() => doAction(cfWithdraw)}>
+                    Chấp thuận rút HS
+                </Menu.Item> */}
+                <Menu.Item icon={<DeleteOutlined />} key="_f6" onClick={() => doAction(rejectWDFN)}>
+                    Không chấp thuận rút HS
+                </Menu.Item>
+            </Menu>
+        )
+    }
+    if (user.role === 'MANAGER') {
+        MenuOption = (
+            <Menu theme="dark">
+                <Menu.Item icon={<CheckCircleOutlined />} key="_m1" onClick={() =>toggleRefundModal(true)}>
+                    Chấp thuận rút HS
+                </Menu.Item>
+                {/* <Menu.Item icon={<CheckCircleOutlined />} key="_m1" onClick={() => doAction(acceptWDGD)}>
+                    Chấp thuận rút HS
+                </Menu.Item> */}
+                <Menu.Item icon={<DeleteOutlined />} key="_m2" onClick={() => doAction(rejectWDGD)}>
+                    Không chấp thuận rút HS
+                </Menu.Item>
+            </Menu>
+        )
+    }
 
 
     const extras = [
@@ -570,6 +607,8 @@ const TLandingPage = () => {
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 pageSize={pageSize}
+                sort={sort}
+                setSort={setSort}
             />
             <div>
                 <StudentDrawer
@@ -600,6 +639,29 @@ const TLandingPage = () => {
                 visible={bc2Modal}
                 onCancel={() => toggleBC2Modal(false)}
                 onOk={() => toggleBC2Modal(false)}
+            />
+            <CPModal
+                title={cpModalTitle}
+                visible={cpModal}
+                onCancel={() => toggleCPModal(false)}
+                onOk={()=>null}
+                confirm={{
+                    'paymentOne': confirmP,
+                    'paymentTwo': confirmP2,
+                    'admCFRF': admCFRF,
+                    'cfWithdraw': cfWithdraw
+                }}
+                command={confirmCmd}
+                selected={selected}
+            />
+            <RefundModal
+                students={students.loadStudents.students.filter((s:any) => {
+                    return selected.indexOf(s._id) >= 0
+                })}
+                // students={[]}
+                onOk={() => doAction(acceptWDGD)}
+                visible={refundModal}
+                onCancel={()=>toggleRefundModal(false)}
             />
         </div>
     )

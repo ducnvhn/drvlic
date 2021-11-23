@@ -17,6 +17,7 @@ import status from '../../../../common/StudentStatus'
 import {
     useAuth
 } from '../../../../../context/AuthenticationContext'
+import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 
 interface cType {
     students: {
@@ -30,7 +31,9 @@ interface cType {
     rowSelection: {
         onChange: (keys: any) => void
         selectedRowKeys: string[]
-    }
+    },
+    sort: Record<string,any>
+    setSort: (sort: Record<string, any>) => void
 }
 
 const StudentList:React.FC<cType> = ({
@@ -39,12 +42,14 @@ const StudentList:React.FC<cType> = ({
     currentPage,
     setCurrentPage,
     pageSize,
-    rowSelection
+    rowSelection,
+    sort,
+    setSort
 }) => {
     // const [selected, setSelected] = React.useState<string[]>([])
     const { getUser } = useAuth()
     const user = getUser()
-    const columns = [
+    const columns:any = [
         {
             title: 'Mã hồ sơ',
             dataIndex: 'randomId',
@@ -60,6 +65,7 @@ const StudentList:React.FC<cType> = ({
         {
             title: 'Ngày tạo',
             dataIndex: 'created',
+            sorter: true, 
             render: (text: string) => <span>{moment(parseFloat(text)).format('DD/MM/YYYY')}</span>
         },
         {
@@ -127,6 +133,13 @@ const StudentList:React.FC<cType> = ({
         <div style={{display: 'flex'}}>
             <Space direction="vertical" size="large" style={{flexGrow: 1}}>
                 <Table
+                    onChange={(pagination, filters, sorter:any, extra) => {
+                        if (sorter) {
+                            let s:Record<string,any> = {}
+                            s[sorter.field as keyof Object] = sorter.order === 'descend' ? 1 : -1
+                            setSort(s)
+                        }
+                    }}
                     rowKey="_id"
                     loading={{
                         spinning: loading,

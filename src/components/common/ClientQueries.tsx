@@ -21,6 +21,7 @@ export const LOAD_SINGLE_STD = gql`
             hopdongdaotao
             trangthai
             mobile
+            refund
             history {
                 state
                 date
@@ -97,8 +98,8 @@ export const REQUEST_CONFIRM_PAYMENT = gql`
     }
 `
 export const CONFIRM_PAYMENT = gql`
-    mutation confirmPayment($students: [String]!) {
-        confirmPayment (students: $students) {
+    mutation confirmPayment($students: [String]!, $amount: Float) {
+        confirmPayment (students: $students, amount: $amount) {
            randomId
             created
             ten
@@ -182,8 +183,8 @@ export const REQUEST_WITHDRAW = gql`
     }
 `
 export const CONFIRM_WITHDRAW = gql`
-    mutation confirmWithdraw($students: [String]!) {
-        confirmWithdraw(students: $students) {
+    mutation confirmWithdraw($students: [String]!, $amount: Float) {
+        confirmWithdraw(students: $students, amount: $amount) {
             _id
             randomId
             created
@@ -469,8 +470,8 @@ export const LOAD_A_REPORT = gql`
     }
 `
 export const APPROVE_RESERV = gql`
-    mutation confirmWithdraw($students: [String]!) {
-        confirmWithdraw(students: $students) {
+    mutation confirmWithdraw($students: [String]!, $amount: Float) {
+        confirmWithdraw(students: $students, amount: $amount) {
             _id
             randomId
             created
@@ -567,8 +568,8 @@ export const REQUEST_CONFIRM_P_2 = gql `
 `
 
 export const CONFIRM_PAYMENT_TWO = gql `
-    mutation confirmPaymentTwo($students: [String]!) {
-        confirmPaymentTwo(students: $students)
+    mutation confirmPaymentTwo($students: [String]!, $amount: Float) {
+        confirmPaymentTwo(students: $students, amount: $amount)
     }
 `
 
@@ -781,8 +782,8 @@ export const TEACHER_REQUEST_CONFIRM_RETEST_FEE = gql`
 `
 
 export const ADM_CONFIRM_RETEST_FEE = gql `
-    mutation adminConfirmRetestFee($students: [String]!) {
-        adminConfirmRetestFee(students: $students)
+    mutation adminConfirmRetestFee($students: [String]!, $amount: Float) {
+        adminConfirmRetestFee(students: $students, amount: $amount)
     }
 `
 export const T_REQUEST_SWAP = gql `
@@ -852,5 +853,11 @@ export const ADM_CONFIRM_SWAP = gql `
                 name
             }
         }
+    }
+`
+
+export const FORCE_STATUS = gql `
+    mutation setStatus($students: [String]!, $trangthai: String!) {
+        setStatus(students: $students, trangthai: $trangthai)
     }
 `
