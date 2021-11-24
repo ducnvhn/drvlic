@@ -7,6 +7,7 @@ import {
 } from 'antd'
 import {
   LogoutOutlined,
+  MoneyCollectOutlined,
   OrderedListOutlined,
   SettingOutlined,
   SnippetsOutlined,
@@ -51,6 +52,7 @@ import SingleAttReport from './SingleReportOne'
 import Profile from './Profile'
 import UserMgt from './UserMgt'
 import SingleUser from './SingleUser'
+import Report from './Report'
 
 const {
   // Sider,
@@ -156,6 +158,13 @@ function Home() {
                   </Menu.Item>
                 </Menu.SubMenu>
               )}
+              {data.me && (data.me.role === 'MANAGER' || data.me.role === 'FINANCE') && (
+                <Menu.Item key="_five" icon={<MoneyCollectOutlined />}>
+                  <Link to="/report">
+                    Doanh Thu
+                  </Link>
+                </Menu.Item>
+              )}
             </Menu>
           </div>
           <Dropdown trigger={['click']} overlay={menu}>
@@ -224,6 +233,9 @@ function Home() {
             </Route>
             <Route path="/users/:id" exact>
               <SingleUser />
+            </Route>
+            <Route path="/report" exact>
+              <Report />
             </Route>
             <Route path="/">
               <Main />

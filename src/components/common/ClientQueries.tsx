@@ -861,3 +861,22 @@ export const FORCE_STATUS = gql `
         setStatus(students: $students, trangthai: $trangthai)
     }
 `
+export const LOAD_RECORDS = gql `
+    query loadRecords($filter: RecordFilter) {
+        loadRecords(filter: $filter) {
+            records {
+                createdBy
+                student {
+                    ten
+                    mobile
+                    randomId
+                }
+                createdAt
+                amount
+                reason
+            }
+            totalRecords
+            totalAmount
+        }
+    }
+`
