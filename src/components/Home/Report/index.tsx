@@ -12,6 +12,7 @@ import {
 } from '../../common/ClientQueries'
 import RecordsList from './comps/RecordsList'
 import RecordHeader from './comps/RecordsHeader'
+import Overview from './comps/Overview'
 
 
 const Report = () => {
@@ -45,6 +46,14 @@ const Report = () => {
             {/* {loading && (<LoadinCenter />)} */}
             {!loading && data && data.loadRecords && (
                 <div>
+                    <Overview
+                        range={{
+                            start: filter.start,
+                            end: filter.end
+                        }}
+                        totalAmount={data.loadRecords.totalAmount}
+                        totalRecords={data.loadRecords.totalRecords}
+                    />
                     <RecordsList
                         records={data.loadRecords}
                         filter={filter}
