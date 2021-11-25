@@ -42,6 +42,7 @@ const Report = () => {
             <RecordHeader
                 filter={filter}
                 setFilter={setFilter}
+                loading={loading}
             />
             {/* {loading && (<LoadinCenter />)} */}
             {!loading && data && data.loadRecords && (

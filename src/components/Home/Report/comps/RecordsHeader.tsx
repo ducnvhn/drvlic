@@ -2,6 +2,7 @@ import React from 'react'
 import {
     PageHeader,
     DatePicker,
+    Button,
     
 } from 'antd'
 import moment, { Moment } from 'moment'
@@ -11,11 +12,13 @@ const { RangePicker } = DatePicker
 type HType = {
     filter: Record<string, any>
     setFilter: (filter: Record<string, any>) => void
+    loading: boolean
 }
 
 const RecordHeader:React.FC<HType> = ({
     filter,
-    setFilter
+    setFilter,
+    loading
 }) => {
     const [start, setStart] = React.useState<Moment|null>(null)
     const [end, setEnd] = React.useState<Moment|null>(null)
@@ -28,17 +31,15 @@ const RecordHeader:React.FC<HType> = ({
         setEnd(end)
     }
 
-    const onConfirm = (open: boolean) => {
-        console.log(open)
+    const onConfirm = () => {
+        // console.log(open)
         // console.log('start:', start)
         // console.log('end:', end)
-        if (!open) {
-            setFilter({
-                ...filter,
-                start: start?.startOf('day'),
-                end: end?.endOf('day')
-            })
-        }
+        setFilter({
+            ...filter,
+            start: start?.startOf('day'),
+            end: end?.endOf('day')
+        })
     }
     return (
         <PageHeader
@@ -51,8 +52,9 @@ const RecordHeader:React.FC<HType> = ({
                     defaultPickerValue={[moment().startOf('month'), moment().endOf('month')]}
                     value={[start, end]}
                     onChange={onDateChange}
-                    onOpenChange={onConfirm}
-                />
+                    // onOpenChange={onConfirm}
+                />,
+                <Button loading={loading} type="primary" onClick={onConfirm}>OK</Button>
             ]}
         />
     )
