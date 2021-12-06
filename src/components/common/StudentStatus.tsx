@@ -2,6 +2,9 @@ const status:Record<string,string> = {
     'MOI_TAO': "Hồ sơ mới",
     'CHO_XAC_NHAN_TT1': "Chờ XNTT đợt 1",
     'CHO_VAO_BC_1': "Chờ vào BC1",
+    'DANG_YC_DOI_HANG':"GV yêu cầu đổi hạng bằng",
+    'DAO_TAO_OK_DOI_HANG':"Đào tạo chấp thuận đổi hạng bằng",
+    'KE_TOAN_OK_DOI_HANG':"Kế toán chấp thuận đổi hạng bằng",
     'DANG_TRONG_BC_1': "Đã xếp vào BC1",
     // 'YEU_CAU_RUT_HS': "Đang YC rút hồ sơ",
     'CHO_XN_HOAN_HUY_FN': "Chờ kế toán XN rút HS",
@@ -28,6 +31,8 @@ const status:Record<string,string> = {
     'CHO_XNTT_TL_LT': 'Chờ XNTT thi lại lý thuyết',
     'CHO_XNTT_TL_SH': 'Chờ XNTT thi lại sa hình',
     'CHO_XNTT_TL_DT': 'Chờ XNTT thi lại đường trường',
+    'DA_XNTT_THI_LAI': 'Đã Thanh toán phí thi lại',
+    'DANG_YC_QUAY_LAI_THI_SH': 'Đang yêu cầu quay lại thi Sát hạch',
     'HOAN_THANH': "Đã hoàn thành"
 }
 export default status

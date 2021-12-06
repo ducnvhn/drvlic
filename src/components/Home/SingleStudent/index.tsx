@@ -57,7 +57,14 @@ import {
     TEACHER_REQUEST_CONFIRM_RETEST_FEE,
     ADM_CONFIRM_RETEST_FEE,
     ADM_CONFIRM_SWAP,
-    FORCE_STATUS
+    FORCE_STATUS,
+    // T_REQUEST_CHANGE_GRADE,
+    ADMIN_ACCEPT_CHANGE_GRADE,
+    ADMIN_REJECT_CHANGE_GRADE,
+    FN_ACCEPT_CHANGE_GRADE,
+    FN_REJECT_CHANGE_GRADE,
+    T_REQUEST_RETURN_FINAL_TEST,
+    ADMIN_ACCEPT_RETURN_FINAL_TEST,
 } from '../../common/ClientQueries'
 import StudentTimeline from './StudentInfo/Timeline'
 
@@ -110,6 +117,13 @@ const SingleStudent = () => {
     const [fnConfirmRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_SINGLE_STD] })
     const [admConfirmSwp] = useMutation(ADM_CONFIRM_SWAP, { refetchQueries: [LOAD_SINGLE_STD] })
     const [forceStatus] = useMutation(FORCE_STATUS, { refetchQueries: [LOAD_SINGLE_STD] })
+    // const [tYCDH] = useMutation(T_REQUEST_CHANGE_GRADE, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [admAcceptChgGrd] = useMutation(ADMIN_ACCEPT_CHANGE_GRADE, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [admRejectChgGrd] = useMutation(ADMIN_REJECT_CHANGE_GRADE, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [fnAcceptChgGrd] = useMutation(FN_ACCEPT_CHANGE_GRADE, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [fnRejectChgGrd] = useMutation(FN_REJECT_CHANGE_GRADE, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [tRequestRFinalTest] = useMutation(T_REQUEST_RETURN_FINAL_TEST, { refetchQueries: [LOAD_SINGLE_STD] })
+    const [aAcceptRFinalTest] = useMutation(ADMIN_ACCEPT_RETURN_FINAL_TEST, { refetchQueries: [LOAD_SINGLE_STD] })
     
     const commands:Record<string,any> = {
         'requestConfirmPayment': requestConfirmPayment,
@@ -143,6 +157,12 @@ const SingleStudent = () => {
         'tRequestCRF': tRequestCRF,
         'fnConfirmRF': fnConfirmRF,
         'admConfirmSwp': admConfirmSwp,
+        'admAcceptChgGrd': admAcceptChgGrd,
+        'admRejectChgGrd': admRejectChgGrd,
+        'fnAcceptChgGrd': fnAcceptChgGrd,
+        'fnRejectChgGrd': fnRejectChgGrd,
+        'tRequestRFinalTest': tRequestRFinalTest,
+        'aAcceptRFinalTest': aAcceptRFinalTest,
         // 'forceStatus': forceStatus
     }
 

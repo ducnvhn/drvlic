@@ -18,6 +18,7 @@ import {
     CheckCircleOutlined,
     CheckOutlined,
     CheckSquareOutlined,
+    CloseOutlined,
     DeleteOutlined,
     DollarOutlined,
     DownloadOutlined,
@@ -30,6 +31,8 @@ import {
     ReloadOutlined,
     RetweetOutlined,
     RollbackOutlined,
+    SwapLeftOutlined,
+    SwapOutlined,
     TransactionOutlined,
     UnorderedListOutlined
 } from '@ant-design/icons'
@@ -66,17 +69,26 @@ import {
     ADMIN_MARK_REMOVE,
     ADMIN_MARK_FINAL_FAIL,
     TEACHER_REQUEST_CONFIRM_RETEST_FEE,
-    ADM_CONFIRM_RETEST_FEE
+    ADM_CONFIRM_RETEST_FEE,
+    ADMIN_ACCEPT_CHANGE_GRADE,
+    ADMIN_REJECT_CHANGE_GRADE,
+    FN_ACCEPT_CHANGE_GRADE,
+    FN_REJECT_CHANGE_GRADE,
+    T_REQUEST_CHANGE_GRADE,
+    T_REQUEST_RETURN_FINAL_TEST,
+    ADMIN_ACCEPT_RETURN_FINAL_TEST
 } from '../../common/ClientQueries'
 import moment from 'moment'
 import StudentStatus from '../../common/StudentStatus'
 import CPModal from './Modals/ConfirmPaymentModal'
 import RefundModal from './Modals/RefundList'
+import ChangeGradeModal from '../SingleStudent/Modals/ChangeGradeModal'
 
 const CREATE_STUDENT = gql`
     mutation CreateStudentMutation($student: StudentInput!) {
         createStudent(student: $student) {
             randomId
+            cmnd
             created
             ten
             ngaysinh
@@ -117,6 +129,7 @@ const LOAD_STUDENTS = gql`
             total
             students {
                 _id
+                cmnd
                 randomId
                 created
                 ten
@@ -207,7 +220,17 @@ const TLandingPage = () => {
     const [admMarkFinalFail] = useMutation(ADMIN_MARK_FINAL_FAIL, { refetchQueries: [LOAD_STUDENTS] })
     const [tRequestCRF] = useMutation(TEACHER_REQUEST_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_STUDENTS] })
     const [admCFRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_STUDENTS] })
+    const [tRequestChangeGrd] = useMutation(T_REQUEST_CHANGE_GRADE, { refetchQueries: [LOAD_STUDENTS] })
+    
+    const [admAcceptChangeGrd] = useMutation(ADMIN_ACCEPT_CHANGE_GRADE, { refetchQueries: [LOAD_STUDENTS] })
+    const [admRejectChangeGrd] = useMutation(ADMIN_REJECT_CHANGE_GRADE, { refetchQueries: [LOAD_STUDENTS] })
+    const [fnAcceptChangeGrd] = useMutation(FN_ACCEPT_CHANGE_GRADE, { refetchQueries: [LOAD_STUDENTS] })
+    const [fnRejectChangeGrd] = useMutation(FN_REJECT_CHANGE_GRADE, { refetchQueries: [LOAD_STUDENTS] })
+    
+    const [tRequestRetestFinal] = useMutation(T_REQUEST_RETURN_FINAL_TEST, { refetchQueries: [LOAD_STUDENTS] })
+    const [aAcceptRetestFinal] = useMutation(ADMIN_ACCEPT_RETURN_FINAL_TEST, { refetchQueries: [LOAD_STUDENTS] })
     const [refundModal, toggleRefundModal] = React.useState(false)
+    const [changeGradeModal, toggleChangeGradeModal] = React.useState(false)
 
     const [filter, setFilter] = React.useState<Record<string,any>>({
         ten: null,
@@ -320,6 +343,7 @@ const TLandingPage = () => {
                     loading: working
                 }
             })
+            toggleWDRModal(false)
         } catch (e) {
             message.error('Đã có lỗi xẩy ra trong quá trình thực hiện - vui lòng kiểm tra lại')
         }
@@ -406,6 +430,33 @@ const TLandingPage = () => {
         })
     }
     let MenuOption = (<Menu />)
+    // if (user.role === 'TEACHER') {
+    //     MenuOption = (
+    //         <Menu theme="dark">
+    //             <Menu.Item icon={<PlusOutlined />} key="t1" onClick={() => toggleCreateDrw(!createDrw)}>
+    //                 Thêm hồ sơ
+    //             </Menu.Item>
+    //             <Menu.SubMenu key="_bc" icon={<CaretLeftFilled />} title="Yêu cầu xác nhận thanh toán">
+    //                 <Menu.Item icon={<DollarOutlined />} key="t2" onClick={() => doAction(requestConfirmP)}>
+    //                     Yêu cầu XNTT đợt 1
+    //                 </Menu.Item>
+    //                 <Menu.Item icon={<PoundOutlined />} key="t3" onClick={() => doAction(requestConfirmP2)}>
+    //                     Yêu cầu XNTT đợt 2
+    //                 </Menu.Item>
+    //                 <Menu.Item icon={<TransactionOutlined />} key="t4" onClick={() => doAction(tRequestCRF)}>
+    //                     Yêu cầu XNTT thi lại
+    //                 </Menu.Item>
+    //             </Menu.SubMenu>
+                
+    //             <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
+    //                 Yêu cầu rút hồ sơ
+    //             </Menu.Item>
+    //             <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
+    //                 Yêu cầu quay lại thi
+    //             </Menu.Item>
+    //         </Menu>
+    //     )
+    // }
     if (user.role === 'TEACHER') {
         MenuOption = (
             <Menu theme="dark">
@@ -423,37 +474,24 @@ const TLandingPage = () => {
                         Yêu cầu XNTT thi lại
                     </Menu.Item>
                 </Menu.SubMenu>
+                <Menu.Item icon={<SwapOutlined />} key="_T41" onClick={() => {
+                    if (!selected || selected.length === 0) {
+                        message.error('Vui lòng chọn hồ sơ trước khi thực hiện thao tác')
+                        return
+                    } else {
+                        toggleChangeGradeModal(true)
+                    }
+                }}>
+                    Yêu cầu đổi hạng bằng
+                </Menu.Item>
                 <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
                     Yêu cầu rút hồ sơ
                 </Menu.Item>
                 <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
                     Yêu cầu quay lại thi
                 </Menu.Item>
-            </Menu>
-        )
-    }
-    if (user.role === 'TEACHER') {
-        MenuOption = (
-            <Menu theme="dark">
-                <Menu.Item icon={<PlusOutlined />} key="t1" onClick={() => toggleCreateDrw(!createDrw)}>
-                    Thêm hồ sơ
-                </Menu.Item>
-                <Menu.SubMenu key="_bc" icon={<CaretLeftFilled />} title="Yêu cầu xác nhận thanh toán">
-                    <Menu.Item icon={<DollarOutlined />} key="t2" onClick={() => doAction(requestConfirmP)}>
-                        Yêu cầu XNTT đợt 1
-                    </Menu.Item>
-                    <Menu.Item icon={<PoundOutlined />} key="t3" onClick={() => doAction(requestConfirmP2)}>
-                        Yêu cầu XNTT đợt 2
-                    </Menu.Item>
-                    <Menu.Item icon={<TransactionOutlined />} key="t4" onClick={() => doAction(tRequestCRF)}>
-                        Yêu cầu XNTT thi lại
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.Item icon={<RollbackOutlined />} key="t5" onClick={() => doAction(requestWD)}>
-                    Yêu cầu rút hồ sơ
-                </Menu.Item>
-                <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doAction(requestReturnResult)}>
-                    Yêu cầu quay lại thi
+                <Menu.Item icon={<ReloadOutlined />} key="t6" onClick={() => doActionWithConfirm(tRequestRetestFinal, 'Yêu cầu thi SH lại', 'Gửi yêu cầu đến bộ phận đào tạo để thi sát hạch lại cho những hồ sơ đã chọn?')}>
+                    Yêu cầu thi lại sát hạch
                 </Menu.Item>
             </Menu>
         )
@@ -467,6 +505,14 @@ const TLandingPage = () => {
                     </Menu.Item>
                     <Menu.Item icon={<UnorderedListOutlined />} key="_a3" onClick={() => toggleBC2Modal(true)}>
                         Chuyển báo cáo 2
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.SubMenu key="_chgrd" title="Hạng bằng" icon={<CaretLeftFilled />}>
+                    <Menu.Item icon={<SwapLeftOutlined />} key="_chgrd_1" onClick={() => doActionWithConfirm(admAcceptChangeGrd, 'Đổi hạng bằng', 'Đồng ý đổi hạng bằng cho các hồ sơ đã chọn ?')}>
+                        Đồng ý đổi hạng bằng
+                    </Menu.Item>
+                    <Menu.Item icon={<SwapLeftOutlined />} key="_chgrd_2" onClick={() => doAction(admRejectChangeGrd)}>
+                        KHÔNG Đồng ý đổi hạng bằng
                     </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.SubMenu key="_course" icon={<CaretLeftFilled />} title="Khóa học">
@@ -491,6 +537,9 @@ const TLandingPage = () => {
                     </Menu.Item>
                     <Menu.Item icon={<ReloadOutlined />} key="_a10" onClick={() => doActionWithConfirm(admConfirmReturn, 'Xác nhận quay lại', 'Xác nhận cho các hồ sơ đang bảo lưu quay lại thi')}>
                         Xác nhận quay lại thi
+                    </Menu.Item>
+                    <Menu.Item icon={<ReloadOutlined />} key="_a11" onClick={() => doActionWithConfirm(aAcceptRetestFinal, 'Xác nhận cho thi lại', 'Xác nhận cho các hồ sơ  đã chọn thi lại sát hạch')}>
+                        Đồng ý cho thi lại sát hạch
                     </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.SubMenu key="_failed" icon={<CaretLeftFilled />} title="Thi trượt">
@@ -531,6 +580,14 @@ const TLandingPage = () => {
                         toggleCPModal(true)
                     }}>
                         Xác nhận thanh toán thi lại
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.SubMenu title="Đổi hạng bằng" icon={<CaretLeftFilled />} key="_fn200">
+                    <Menu.Item icon={<CheckOutlined />} onClick={() => doActionWithConfirm(fnAcceptChangeGrd, 'Đổi hạng bằng', 'Bạn có chắc muốn đồng ý đổi hạng bằng cho các hồ sơ đã chọn?')}>
+                        Đồng ý đổi bằng
+                    </Menu.Item>
+                    <Menu.Item icon={<CloseOutlined />} onClick={() => doAction(fnRejectChangeGrd)}>
+                        KHÔNG đồng ý đổi bằng
                     </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.Item icon={<CheckCircleOutlined />} key="_f5" onClick={() =>{
@@ -662,6 +719,21 @@ const TLandingPage = () => {
                 onOk={() => doAction(acceptWDGD)}
                 visible={refundModal}
                 onCancel={()=>toggleRefundModal(false)}
+            />
+            <ChangeGradeModal
+                visible={changeGradeModal}
+                onCancel={() => toggleChangeGradeModal(false)}
+                onOk={async (ycdh: string) => {
+                    await tRequestChangeGrd({
+                        variables: {
+                            students: selected,
+                            ycdh
+                        }
+                    })
+                }}
+                students={students.loadStudents.students.filter((s: any) => {
+                    return selected.indexOf(s._id) >= 0
+                })}
             />
         </div>
     )

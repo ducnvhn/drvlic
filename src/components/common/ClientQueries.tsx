@@ -6,6 +6,7 @@ export const LOAD_SINGLE_STD = gql`
     query loadSingle($id: String!) {
         loadSingleStd(id: $id) {
             _id
+            cmnd
             randomId
             created
             ten
@@ -878,5 +879,40 @@ export const LOAD_RECORDS = gql `
             totalRecords
             totalAmount
         }
+    }
+`
+export const T_REQUEST_CHANGE_GRADE = gql `
+    mutation tRequestChangeGrade($students: [String]!, $ycdh: String!) {
+        tRequestChangeGrade(students: $students, ycdh: $ycdh)
+    }
+`
+export const ADMIN_ACCEPT_CHANGE_GRADE = gql `
+    mutation adminAcceptChangeGrade($students: [String]!) {
+        adminAcceptChangeGrade(students: $students)
+    }
+`
+export const ADMIN_REJECT_CHANGE_GRADE = gql `
+    mutation adminRejectChangeGrade($students: [String]!) {
+        adminRejectChangeGrade(students: $students)
+    }
+`
+export const FN_ACCEPT_CHANGE_GRADE = gql `
+    mutation fnAcceptChangeGrade($students: [String]!) {
+        fnAcceptChangeGrade(students: $students)
+    }
+`
+export const FN_REJECT_CHANGE_GRADE = gql `
+    mutation fnRejectChangeGrade($students: [String]!) {
+        fnRejectChangeGrade(students: $students)
+    }
+`
+export const T_REQUEST_RETURN_FINAL_TEST = gql `
+    mutation tRequestRetestFinal($students: [String]!) {
+        tRequestRetestFinal(students: $students)
+    }
+`
+export const ADMIN_ACCEPT_RETURN_FINAL_TEST = gql `
+    mutation adminAcceptRetestFinal($students: [String]!) {
+        adminAcceptRetestFinal(students: $students)
     }
 `

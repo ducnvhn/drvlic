@@ -25,9 +25,9 @@ const RecordHeader:React.FC<HType> = ({
 
     const onDateChange = (d: any) => {
         const [start, end] = d
-        console.log('start', start)
+        // console.log('start', start)
         setStart(start)
-        console.log('end', end)
+        // console.log('end', end)
         setEnd(end)
     }
 

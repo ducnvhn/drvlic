@@ -29,7 +29,10 @@ import {
     CaretLeftFilled,
     PoundOutlined,
     SwapOutlined,
-    FieldTimeOutlined
+    FieldTimeOutlined,
+    ArrowUpOutlined,
+    UserSwitchOutlined,
+    WarningOutlined
 } from '@ant-design/icons'
 import {
     useHistory
@@ -51,10 +54,12 @@ import {
     CONFIRM_PAYMENT,
     CONFIRM_PAYMENT_TWO,
     ADM_CONFIRM_RETEST_FEE,
-    CONFIRM_WITHDRAW
+    CONFIRM_WITHDRAW,
+    T_REQUEST_CHANGE_GRADE
 } from '../../common/ClientQueries'
 import CPModal from '../Main/Modals/ConfirmPaymentModal'
 import RefundModal from '../Main/Modals/RefundList'
+import ChangeGradeModal from './Modals/ChangeGradeModal'
 // import { Moment } from 'moment'
 
 type CType = {
@@ -88,6 +93,7 @@ const Header:React.FC<CType> = ({
     const [reportModal, toggleReportModal] = React.useState(false)
     const [reservModal, toggleReservModal] = React.useState(false)
     const [deleteModal, toggleDeleteModdal] = React.useState(false)
+    const [changeGradeModal, toggleChangeGradeModal] = React.useState(false)
     // const [rModal, toggleRModal] = React.useState(false)
     // const [acceptRsvModal, toggleAcceptRsvModal] = React.useState(false)
     const [r2Modal, toggleR2Modal] = React.useState(false)
@@ -101,6 +107,7 @@ const Header:React.FC<CType> = ({
     const [confirmP2] = useMutation(CONFIRM_PAYMENT_TWO, { refetchQueries: [LOAD_SINGLE_STD] })
     const [admCFRF] = useMutation(ADM_CONFIRM_RETEST_FEE, { refetchQueries: [LOAD_SINGLE_STD] })
     const [confirmWithdraw] = useMutation(CONFIRM_WITHDRAW, { refetchQueries: [LOAD_SINGLE_STD]})
+    const [tRequestChangeGrade] = useMutation(T_REQUEST_CHANGE_GRADE, { refetchQueries: [LOAD_SINGLE_STD]})
     const selected = [student._id]
 
     const history = useHistory()
@@ -115,7 +122,7 @@ const Header:React.FC<CType> = ({
             }
             if (trangthai === 'CHO_VAO_BC_1') {
                 items.push(<Menu.Item key="T_j2" onClick={() => toggleReservModal(true)} icon={<UsergroupAddOutlined />}>Yêu cầu rút hồ sơ</Menu.Item>)
-                // items.push(<Menu.Item key="T_j2" onClick={() => toggleReservModal(true)} icon={<UsergroupAddOutlined />}>Yêu cầu rút hồ sơ</Menu.Item>)
+                items.push(<Menu.Item key="T_j12" onClick={() => toggleChangeGradeModal(true)} icon={<UserSwitchOutlined />}>Yêu cầu đổi hạng bằng</Menu.Item>)
             }
             if (trangthai === 'DANG_TRONG_BC_1') {
                 // items.push(<Menu.Item key="T_4" onClick={() => confirmReservBC1([_id])} icon={<CalendarOutlined />}>Yêu cầu bảo lưu</Menu.Item>)
@@ -147,6 +154,10 @@ const Header:React.FC<CType> = ({
             if (trangthai === 'THI_TRUOT_LT' || trangthai === 'THI_TRUOT_SH' || trangthai === 'THI_TRUOT_DT') {
                 items.push(<Menu.Item key="T_11" onClick={() => doAction('tRequestCRF',[_id])} icon={<PoundOutlined />}>Yêu cầu XNTT thi lại</Menu.Item>)
             }
+            if (trangthai === 'DA_XNTT_THI_LAI') {
+                items.push(<Menu.Item key="T_14" onClick={() => doAction('tRequestRFinalTest', [_id])} icon={<ReloadOutlined />}>Yêu cầu thi lại sát hạch</Menu.Item>)
+            }
+
         }
         // finance actions - 
         if (role === 'FINANCE') {
@@ -157,6 +168,18 @@ const Header:React.FC<CType> = ({
                     setConfirmCMD('paymentOne')
                     toggleCPModal(true)
                 }}>Xác nhận thanh toán đợt 1</Menu.Item>)
+            }
+            if (trangthai === 'DAO_TAO_OK_DOI_HANG') {
+                items.push(
+                    <Menu.SubMenu key="f_hangbang" title="Hạng bằng" icon={<CaretLeftFilled />}>
+                        <Menu.Item icon={<CheckOutlined />} onClick={() => doAction('fnAcceptChgGrd', [_id])}>
+                            Đồng ý đổi hạng bằng
+                        </Menu.Item>
+                        <Menu.Item icon={<WarningOutlined />} onClick={() => doAction('fnRejectChgGrd', [_id])}>
+                            KHÔNG đồng ý đổi hạng bằng
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                )
             }
             if (trangthai === 'CHO_XAC_NHAN_TT2') {
                 // items.push(<Menu.Item key="F_confirmP2" icon={<CheckCircleFilled />} onClick={() => doAction('confirmPaymentTwo',[_id])}>Xác nhận thanh toán đợt 2</Menu.Item>)
@@ -205,6 +228,11 @@ const Header:React.FC<CType> = ({
             if (trangthai ==='CHO_VAO_BC_1') {
                 items.push(<Menu.Item key="A_priorJoin" onClick={() => toggleReportModal(true)} icon={<UsergroupAddOutlined />}>Chuyển vào báo cáo 1</Menu.Item>)
             }
+            if (trangthai === 'DANG_YC_DOI_HANG') {
+                items.push(<Menu.Item key="A_acceptChgrd" onClick={() => doAction('admAcceptChgGrd', [_id])} icon={<UsergroupAddOutlined />}>Đồng ý đổi hạng bằng</Menu.Item>)
+                items.push(<Menu.Item key="A_acceptChgrd" onClick={() => doAction('admRejectChgGrd', [_id])} icon={<WarningOutlined />}>KHÔNG đồng ý đổi hạng bằng</Menu.Item>)
+                
+            }
             if (trangthai === 'DA_RUT_HS') {
                 items.push(<Menu.Item icon={<DeleteOutlined />} key="A_Daruths" onClick={() => confirmDelete(_id)}>Xóa hồ sơ</Menu.Item>)
             }
@@ -243,6 +271,9 @@ const Header:React.FC<CType> = ({
                         <Menu.Item key="_a103" onClick={() => markFailed([_id], 'THI_TRUOT_DT')}>Thi trượt đường trường</Menu.Item>
                     </Menu.SubMenu>
                 )
+            }
+            if (trangthai === 'DANG_YC_QUAY_LAI_THI_SH') {
+                items.push(<Menu.Item icon={<CheckOutlined />} key="A_83" onClick={() => confirmAction('aAcceptRFinalTest',[_id], "Quay lại thi sát hạch", "Bạn có muốn cho hồ sơ này quay lại thi sát hạch?")}>Đồng ý quay lại thi sát hạch</Menu.Item>)
             }
         }
         if (role === 'MANAGER') {
@@ -361,6 +392,19 @@ const Header:React.FC<CType> = ({
                 onCancel={() => toggleRefundModal(false)}
                 students={[student]}
                 onOk={() => doAction('confirmWDGD', [student._id])}
+            />
+            <ChangeGradeModal
+                visible={changeGradeModal}
+                onCancel={() => toggleChangeGradeModal(false)}
+                onOk={async(ycdh: string) => {
+                    await tRequestChangeGrade({
+                        variables: {
+                            students: [student._id],
+                            ycdh
+                        }
+                    })
+                }}
+                students={[student]}
             />
         </div>
     )

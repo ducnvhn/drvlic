@@ -8,6 +8,10 @@ import {
 } from 'antd'
 import moment from 'moment'
 import status from '../../../common/StudentStatus'
+import axios from 'axios'
+import {
+    useAuth
+} from '../../../../context/AuthenticationContext'
 
 const { Title } = Typography
 
@@ -21,6 +25,17 @@ const BasicInfo:React.FC<BasicInfoType> = ({
     student,
     role,
 }) => {
+    // const { getToken } = useAuth()
+    // const token = getToken()
+    // const { anh34 } = student
+    // const axiosInstance = axios.create({
+    //     baseURL: 'http://localhost:3000/api',
+    //     headers: {
+    //         'x-token': 'mytoken'
+    //     }
+    // })
+    // axiosInstance.get(anh34)
+    // axios.get(`http://localhost:5001${anh34}`)
     return (
         <div>
             <Divider />
@@ -37,7 +52,7 @@ const BasicInfo:React.FC<BasicInfoType> = ({
                 <Descriptions.Item label="Quê quán">{student.quequan}</Descriptions.Item>
                 <Descriptions.Item label="Số điện thoại">{student.mobile}</Descriptions.Item>
                 <Descriptions.Item label="CMND">
-                    <Image src={`http://localhost:5001/${student.anh34}`} />
+                    <Image src={`http://localhost:5001${student.anh34}?xtoken="some_token_i_received"`} />
                 </Descriptions.Item>
             </Descriptions>
             <Divider />

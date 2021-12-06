@@ -123,6 +123,9 @@ const CreateStudentForm: React.FC<CTypes> = ({
                         placeholder="Chọn ngày tháng năm sinh"
                     />
                 </Form.Item>
+                <Form.Item name="cmnd" label="Số CMND / CCCD" rules={[{required: true, message: "Bắt buộc phải có"}]}>
+                    <Input />
+                </Form.Item>
                 <Form.Item name="quequan" label="Quê Quán" rules={[{ required: true, message: 'Trường bắt buộc' }]}>
                     <Input />
                 </Form.Item>
